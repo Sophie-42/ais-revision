@@ -11,8 +11,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="AIS Révision">
-<title>AIS Révision</title>
+<meta name="apple-mobile-web-app-title" content="root@AIS">
+<title>root@AIS_révision</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -54,7 +54,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mono{font-family:var(--f-mono)}
 
 /* ---------- Sommaire ---------- */
-.prompt{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap}
+.prompt{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
 .prompt .u{color:var(--ok)} .prompt .p{color:#5aa8ff}
 .caret{display:inline-block;width:8px;height:15px;background:var(--ok);vertical-align:-2px;animation:blink 1.1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
@@ -5395,8 +5395,8 @@ function renderHome(){
   const validated = SEASONS.filter(s => best[s.id] && best[s.id].pct >= 70).length;
   $app.innerHTML = `<div class="wrap">
     <div class="hero">
-      <div class="prompt"><span class="u">ais@revision</span>:<span class="p">~</span>$ ls ./saisons <span class="caret"></span></div>
-      <h1>AIS<span>//</span>Révision</h1>
+      <div class="prompt"><span class="u">root@AIS_révision</span>:<span class="p">~</span># ls ~/formation/oclock/ais <span class="caret"></span></div>
+      <h1>root<span>@</span>AIS_révision</h1>
       <p>Fiches de révision pour le titre Administrateur.trice d'infrastructures sécurisées, saison par saison, avec flashcards et QCM corrigés.</p>
     </div>
     <div class="stats">

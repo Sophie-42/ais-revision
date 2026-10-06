@@ -1,6 +1,6 @@
 {
-  "name": "AIS Révision",
-  "short_name": "AIS Révision",
+  "name": "root@AIS_révision",
+  "short_name": "root@AIS",
   "description": "Fiches de révision, synthèses, flashcards et QCM pour le titre Administrateur.trice d'infrastructures sécurisées.",
   "lang": "fr",
   "start_url": "./",
