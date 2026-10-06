@@ -5584,12 +5584,66 @@ function flashHTML(s){
 }
 
 /* ---------- QCM ---------- */
+const QUIZ_LEN = 10, QUIZ_WRITTEN = 5;
+const GENERIC_KEY = /^(exemples?|autres?|mieux|règle|règles|fin|principe|définition|texte|obligations|usages?|types?|formats?|outils|méthode|à retenir|cas|choix|gains|bien|mal|danger|logs|terrain|piège.*|quand.*|contenu|rôle|portée|exclusions|parades|risques|compléments|repères|aujourd'hui|but|atouts|limites|avantages?|inconvénients?)$/i;
+
+/* Questions générées à partir des cartes : terme ↔ définition, leurres pris dans le même thème. */
+function cardPairs(s){
+  if(s._pairs) return s._pairs;
+  const out = [];
+  s.sections.forEach(sec => sec.g.forEach(g => {
+    if(!g.kv) return;
+    g.kv.forEach(([k,v]) => {
+      if(/^[\d\s·/+-]+$/.test(k) || k.length > 45 || GENERIC_KEY.test(k.trim())) return;
+      if(v.length < 6 || v.length > 170) return;
+      out.push({k, v, ctx: g.h || sec.t, sec: sec.t, grp: g});
+    });
+  }));
+  return (s._pairs = out);
+}
+function genQuestion(s, p){
+  const all = cardPairs(s);
+  const near = arr => arr.filter(x => x !== p && x.v !== p.v && x.k !== p.k);
+  let pool = near(all.filter(x => x.grp === p.grp));
+  if(pool.length < 3) pool = pool.concat(near(all.filter(x => x.sec === p.sec && x.grp !== p.grp)));
+  if(pool.length < 3) pool = pool.concat(near(all.filter(x => x.sec !== p.sec)));
+  const d = shuffle(pool).slice(0, 3);
+  if(d.length < 3) return null;
+  const askTerm = Math.random() < 0.5;
+  const src = `Carte « ${p.sec} › ${p.ctx} »`;
+  if(askTerm){
+    return {
+      q: `${p.ctx} : quel terme correspond à « ${p.v} » ?`,
+      o: [p.k, ...d.map(x => x.k)],
+      e: `« ${p.k} » : ${p.v}. (${src})`,
+      wk: [null, ...d.map(x => `« ${x.k} », c'est : ${x.v}.`)]
+    };
+  }
+  return {
+    q: `${p.ctx} : que désigne « ${p.k} » ?`,
+    o: [p.v, ...d.map(x => x.v)],
+    e: `« ${p.k} » : ${p.v}. (${src})`,
+    wk: [null, ...d.map(x => `La réponse choisie décrit « ${x.k} ».`)]
+  };
+}
+function buildQuiz(s){
+  const written = shuffle(s.quiz).slice(0, QUIZ_WRITTEN);
+  const out = written.slice();
+  const pairs = shuffle(cardPairs(s));
+  for(const p of pairs){
+    if(out.length >= QUIZ_LEN) break;
+    const q = genQuestion(s, p);
+    if(q) out.push(q);
+  }
+  for(const q of shuffle(s.quiz)){ if(out.length >= QUIZ_LEN) break; if(!out.includes(q)) out.push(q); }
+  return out;
+}
 function startQuiz(s, subset){
-  const src = subset || s.quiz;
+  const src = subset || buildQuiz(s);
   state.quiz = {
     full: !subset,
     i: 0, done: false, onlyWrong: false,
-    qs: shuffle(src).map(q => ({q:q.q, e:q.e, o:q.o, opts: shuffle(q.o.map((t,j) => ({t, ok: j===0}))), pick:null}))
+    qs: shuffle(src).map(q => ({q:q.q, e:q.e, o:q.o, wk:q.wk, opts: shuffle(q.o.map((t,j) => ({t, j, ok: j===0}))), pick:null}))
   };
 }
 function quizHTML(s){
@@ -5599,8 +5653,8 @@ function quizHTML(s){
     return `<div class="panel">
       <p class="mono" style="color:var(--c);font-size:12px">$ ./qcm --saison ${s.id.toLowerCase()}</p>
       <h3>QCM · ${esc(s.title)}</h3>
-      <p>${s.quiz.length} questions tirées dans le désordre, réponses mélangées. Tu réponds à tout, puis tu reçois la correction détaillée avec l'explication de chaque erreur.</p>
-      <div class="meta"><span>Questions <b>${s.quiz.length}</b></span><span>Meilleur score <b>${sc ? sc.pct + " %" : "—"}</b></span>${sc ? `<span>Le <b>${new Date(sc.date).toLocaleDateString("fr-FR")}</b></span>` : ""}</div>
+      <p>${QUIZ_LEN} questions tirées au hasard à chaque lancement : un nouveau QCM à chaque fois. Tu réponds à tout, puis tu reçois la correction détaillée avec l'explication de chaque erreur.</p>
+      <div class="meta"><span>Banque <b>${s.quiz.length} rédigées + ${cardPairs(s).length} issues des cartes</b></span><span>Meilleur score <b>${sc ? sc.pct + " %" : "—"}</b></span>${sc ? `<span>Le <b>${new Date(sc.date).toLocaleDateString("fr-FR")}</b></span>` : ""}</div>
       <div class="btn-row"><button class="btn pri" data-act="quiz-start">Lancer le QCM ›</button></div>
     </div>`;
   }
@@ -5631,7 +5685,7 @@ function quizHTML(s){
   </div>
   <div class="btn-row">
     ${wrong.length ? `<button class="btn pri" data-act="quiz-wrong">Refaire mes ${wrong.length} erreur${wrong.length>1?"s":""}</button>` : ""}
-    <button class="btn" data-act="quiz-start">Refaire tout le QCM</button>
+    <button class="btn" data-act="quiz-start">Nouveau QCM (${QUIZ_LEN} questions)</button>
   </div></div>
   <div class="corr-h"><h4>Correction</h4>${wrong.length ? `<button class="toggle" aria-pressed="${z.onlyWrong}" data-act="only-wrong">${z.onlyWrong ? "Erreurs seulement ✓" : "Afficher seulement les erreurs"}</button>` : ""}</div>
   <div class="corr">${list.map(q => {
@@ -5643,6 +5697,7 @@ function quizHTML(s){
       <p class="cq">${esc(q.q)}</p>
       <div class="a">${ok ? `<span>ta réponse</span><b class="g">${esc(mine.t)}</b>` : `<span>ta réponse</span><span class="y">${esc(mine ? mine.t : "—")}</span><span>la bonne</span><b class="g">${esc(q.o[0])}</b>`}</div>
       <p class="ex">${esc(q.e)}</p>
+      ${!ok && mine && q.wk && q.wk[mine.j] ? `<p class="ex">${esc(q.wk[mine.j])}</p>` : ""}
     </article>`;
   }).join("")}</div>`;
 }
@@ -5701,7 +5756,7 @@ $app.addEventListener("click", e => {
   if(act === "quiz-start"){ startQuiz(s); renderPane(); window.scrollTo(0,0); return; }
   if(act === "quiz-quit"){ state.quiz = null; renderPane(); return; }
   if(act === "quiz-wrong"){
-    const wrong = state.quiz.qs.filter(q => !(q.opts[q.pick] && q.opts[q.pick].ok)).map(q => ({q:q.q, o:q.o, e:q.e}));
+    const wrong = state.quiz.qs.filter(q => !(q.opts[q.pick] && q.opts[q.pick].ok)).map(q => ({q:q.q, o:q.o, e:q.e, wk:q.wk}));
     startQuiz(s, wrong); renderPane(); window.scrollTo(0,0); return;
   }
   if(act === "pick"){ state.quiz.qs[state.quiz.i].pick = +b.dataset.j; renderPane(); return; }
