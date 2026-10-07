@@ -2080,13 +2080,44 @@ sections:[
    [".env","Variables (mots de passe, ports) : ne jamais le commiter"],
    ["Interpolation","${MYSQL_ROOT_PASSWORD} dans docker-compose.yml"],
    ["Suite","Orchestration à grande échelle : Swarm / Kubernetes"]]}
+ ]},
+ {t:"Orchestration : Docker Swarm", ref:"fiche 03", g:[
+  {h:"Pourquoi orchestrer", kv:[
+   ["Limite de Compose","Un seul hôte : si le serveur tombe, toute l'appli tombe"],
+   ["Docker Swarm","Clustering + orchestration intégrés à Docker : plusieurs machines vues comme un seul hôte"],
+   ["Apports","Haute dispo, secrets, scalabilité (réplicas + load-balancing), rolling updates"]]},
+  {h:"Managers, workers & quorum", kv:[
+   ["Manager","Gère le cluster et planifie les services ; un leader est élu (algorithme Raft)"],
+   ["Worker","Exécute les conteneurs (un manager est aussi worker par défaut)"],
+   ["Quorum","Managers nécessaires au fonctionnement : (managers / 2) + 1, arrondi à l'entier inférieur"],
+   ["3 managers","Quorum 2 : 1 panne tolérée"],
+   ["5 managers","Quorum 3 : 2 pannes tolérées"],
+   ["Nombre impair","Toujours : un nombre pair expose au split-brain"],
+   ["Ports","TCP 2377 (gestion) · TCP/UDP 7946 (découverte) · UDP 4789 (overlay)"]]},
+  {h:"Nœuds", kv:[
+   ["docker swarm init","Créer le cluster sur le premier manager"],
+   ["docker swarm join","Rejoindre le cluster avec un token"],
+   ["docker node ls","Lister les nœuds"],
+   ["promote / demote","Passer un nœud manager / worker (demote avant d'arrêter un manager)"],
+   ["drain","Vider un nœud : ses tâches partent sur les autres (maintenance)"],
+   ["pause","Plus de nouvelles tâches, les existantes continuent"]]},
+  {h:"Services", kv:[
+   ["Service","Ce qu'on veut : une abstraction avec N réplicas répartis sur le cluster"],
+   ["Réplica","Si un réplica tombe, Swarm en relance un automatiquement"],
+   ["Routing mesh","Le service répond sur le port publié de n'importe quel nœud"],
+   ["--mode global","Un conteneur par nœud (agents de monitoring, logs)"],
+   ["--constraint","Placement : node.role==worker, node.labels.env==production"],
+   ["Rolling update","Mise à jour par lots sans coupure (--update-parallelism, --update-delay)"],
+   ["--rollback","Revenir à la version précédente du service"],
+   ["Backup Swarm","/var/lib/docker/swarm : l'état du cluster, pas les données (volumes à part)"]]}
  ]}
 ],
 notes:[
  "EXPOSE ne publie aucun port : c'est de la documentation. Pour rendre un service accessible depuis l'hôte, il faut -p 8080:80 avec docker run, ou ports: dans Compose.",
  "depends_on règle seulement l'ordre de démarrage : il n'attend pas que la base soit prête à répondre. Pour ça, on ajoute un healthcheck au service db et depends_on: db: condition: service_healthy.",
  "La syntaxe actuelle est docker compose (plugin v2, avec un espace). L'ancien binaire docker-compose (avec un tiret) n'est plus maintenu, et la ligne version: en tête du fichier YAML est désormais ignorée.",
- "Un conteneur partage le noyau de l'hôte : l'isolation est plus faible qu'une VM. D'où les bonnes pratiques de la fiche (utilisateur non-root, images officielles et à jour, pas de secrets dans l'image)."
+ "Un conteneur partage le noyau de l'hôte : l'isolation est plus faible qu'une VM. D'où les bonnes pratiques de la fiche (utilisateur non-root, images officielles et à jour, pas de secrets dans l'image).",
+ "Swarm : les jetons de docker swarm join-token n'expirent pas au bout de 5 minutes. Ils restent valables tant qu'on ne les renouvelle pas avec docker swarm join-token --rotate worker (à faire si un jeton a fuité)."
 ],
 quiz:[
  {q:"Quelle est la différence entre une image et un conteneur Docker ?", o:["L'image est le modèle immuable, le conteneur une instance qui tourne","Le conteneur est le modèle, l'image l'instance","L'image contient un OS complet, pas le conteneur","Ce sont deux noms pour la même chose"], e:"Image = la « classe », figée. Conteneur = l'« objet » créé à partir d'elle ; on peut en lancer autant qu'on veut depuis une même image."},
@@ -2101,7 +2132,14 @@ quiz:[
  {q:"Pourquoi utiliser un volume pour une base de données en conteneur ?", o:["Un conteneur est éphémère : sans volume, ses données disparaissent avec lui","Pour accélérer les requêtes SQL","Pour partager la base sur Internet","C'est obligatoire pour démarrer MariaDB"], e:"Supprimer un conteneur supprime ses données. Un named volume (géré par Docker) assure la persistance ; c'est le choix recommandé en prod."},
  {q:"Bind mount ou named volume : lequel pour du développement ?", o:["Le bind mount, qui relie un dossier de l'hôte au conteneur","Le named volume, toujours","Aucun des deux","Un volume réseau NFS uniquement"], e:"Le bind mount (./src:/var/www/html) permet de modifier le code sur l'hôte et de voir le résultat aussitôt. En prod on préfère le named volume, géré par Docker."},
  {q:"Où placer les mots de passe d'une stack Compose ?", o:["Dans un fichier .env non commité, appelé via ${VARIABLE}","En clair dans le Dockerfile","Directement dans l'image","Dans le README du projet"], e:"Le .env est lu par Compose (interpolation ${MYSQL_ROOT_PASSWORD}) et reste hors du dépôt Git. Un secret dans l'image ou le Dockerfile est exposé à quiconque récupère l'image."},
- {q:"Quelle commande arrête et nettoie toute une stack Compose ?", o:["docker compose down","docker compose stop all","docker compose ps","docker compose pull"], e:"down arrête et supprime les conteneurs et le réseau du projet (les named volumes sont conservés, sauf avec -v). ps affiche l'état, pull met à jour les images."}
+ {q:"Quelle commande arrête et nettoie toute une stack Compose ?", o:["docker compose down","docker compose stop all","docker compose ps","docker compose pull"], e:"down arrête et supprime les conteneurs et le réseau du projet (les named volumes sont conservés, sauf avec -v). ps affiche l'état, pull met à jour les images."},
+ {q:"Quelle limite de Docker Compose Docker Swarm vient-il combler ?", o:["Compose ne gère qu'un seul hôte : si le serveur tombe, l'appli tombe","Compose ne sait pas lancer plusieurs conteneurs","Compose ne lit pas les fichiers YAML","Compose ne fonctionne pas avec des volumes"], e:"Swarm regroupe plusieurs machines en un cluster vu comme un seul hôte Docker : haute dispo, réplicas répartis, rolling updates."},
+ {q:"Avec 5 managers, combien de pannes de managers le cluster Swarm tolère-t-il ?", o:["2","1","3","5"], e:"Quorum = (5 / 2) + 1 = 3 managers nécessaires. Le cluster survit donc à la perte de 2 managers. Avec 3 managers : quorum 2, 1 panne tolérée."},
+ {q:"Pourquoi toujours un nombre impair de managers ?", o:["Un nombre pair expose au split-brain sans tolérer davantage de pannes","Swarm refuse un nombre pair","Pour équilibrer la charge des workers","Pour économiser des licences"], e:"4 managers ont un quorum de 3 : ils ne tolèrent qu'une panne, comme 3 managers, mais un partage en deux moitiés égales bloque le cluster (split-brain)."},
+ {q:"Quelle différence entre un service et un conteneur dans Swarm ?", o:["Le service décrit l'état voulu (N réplicas) ; les conteneurs sont ce qui tourne","Un service ne contient qu'un seul conteneur","Le conteneur décide du placement des services","Ce sont des synonymes"], e:"« Le service, c'est ce qu'on veut, les conteneurs, c'est ce qui tourne ». Si un réplica tombe, Swarm en relance un pour revenir à l'état voulu."},
+ {q:"Quelle disponibilité donner à un nœud avant une maintenance ?", o:["drain : ses tâches sont migrées sur les autres nœuds","pause : tout s'arrête immédiatement","active","demote"], e:"drain vide le nœud en déplaçant ses tâches. pause empêche seulement les nouvelles tâches. demote sert à rétrograder un manager en worker."},
+ {q:"Que contient la sauvegarde de /var/lib/docker/swarm ?", o:["L'état du cluster, pas les données des conteneurs","Toutes les données des volumes","Les images Docker","Les logs des services"], e:"Le backup Swarm protège la configuration du cluster (nœuds, services, secrets). Les volumes doivent être sauvegardés séparément."},
+ {q:"Comment mettre à jour l'image d'un service Swarm sans coupure ?", o:["docker service update --image … avec un rolling update","docker service rm puis docker service create","docker swarm init --force-new-cluster","docker node demote sur chaque nœud"], e:"Le rolling update remplace les réplicas par lots (--update-parallelism) avec un délai (--update-delay). En cas de problème : docker service update --rollback."}
 ]}
 ];
 
@@ -5698,6 +5736,41 @@ SC4:[
     ["Volumes","2 types","**Named volume** (db_data:/var/lib/mysql) : géré par Docker, recommandé en prod. **Bind mount** (./src:/var/www/html) : lien vers un dossier de l'hôte, pratique en dev. Un conteneur est éphémère : supprimé → données perdues. Les volumes assurent la persistance."]]},
    {code:"# dans le code PHP, host = \"db\"\nnew PDO(\"mysql:host=db;dbname=myapp\", \"root\", \"secret\");\n\n# Fichier .env : ne jamais commiter !\nMYSQL_ROOT_PASSWORD=supersecret\nMYSQL_DATABASE=myapp\nAPP_PORT=8080\n\n# Dans docker-compose.yml : interpolation ${VAR}\nservices:\n  db:\n    environment:\n      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}\n      MYSQL_DATABASE: ${MYSQL_DATABASE}\n  web:\n    ports: [\"${APP_PORT}:80\"]"},
    {def:"**En résumé** : Dockerfile = recette pour construire une image · docker build = cuire la recette · Docker Compose = orchestrer plusieurs conteneurs · docker-compose.yml = la partition de l'orchestre. Prochaine étape : orchestration à grande échelle avec Swarm / Kubernetes."}]}
+ ]},
+ {id:"03", t:"Orchestration : Docker Swarm", sub:"Managers/workers, quorum, services & réplicas, rolling updates, backup du cluster", parts:[
+  {h:"Pourquoi orchestrer ?", g:[
+   {p:"Docker Compose lance une appli sur **un seul hôte**. Mais dès qu'il y a plusieurs serveurs : un serveur tombe → les conteneurs aussi · le trafic explose → comment scaler ? · une mise à jour → sans coupure ? · comment distribuer des secrets entre machines ? Docker Swarm répond à tout ça."},
+   {def:"**Docker Swarm** = outil de clustering + orchestration intégré à Docker. Il permet de gérer un ensemble de machines hôtes comme un seul hôte Docker. Apports clés : haute dispo, sécurité (secrets), scalabilité (réplication + load-balancing), rolling updates."}]},
+  {h:"Architecture : managers, workers & quorum", g:[
+   {cols:[
+    ["Managers","chefs d'orchestre","Gèrent le cluster, planifient les services. Un leader est élu parmi eux (algorithme Raft) ; si le leader tombe, un nouveau est élu automatiquement."],
+    ["Workers","musiciens","Exécutent les conteneurs. Un manager est aussi worker par défaut."]]},
+   {def:"**Quorum** = nombre minimum de managers pour que le cluster fonctionne. Formule : Quorum = (nb_managers / 2) + 1 (division entière)."},
+   {table:{head:["Managers","Quorum","Pannes tolérées"], rows:[["1","1","0"],["3","2","1"],["5","3","2"],["7","4","3"]]}},
+   {p:"Toujours un nombre **IMPAIR** de managers. Un nombre pair → risque de **split-brain** (deux moitiés qui se croient leader) → le cluster se bloque."},
+   {p:"**Ports à ouvrir** : TCP 2377 (communication manager ↔ workers) · TCP/UDP 7946 (découverte) · TCP/UDP 4789 (trafic de données overlay)."}]},
+  {h:"Initialisation & gestion des nœuds", g:[
+   {code:"# Créer le premier manager : génère un token\ndocker swarm init --advertise-addr <IP-DU-MANAGER>\n# Rejoindre le cluster (worker)\ndocker swarm join --token <TOKEN> <IP-DU-MANAGER>:2377\n# Récupérer les tokens\ndocker swarm join-token worker\ndocker swarm join-token manager\n# Vérifier l'état du cluster\ndocker node ls\n# Promotion / rétrogradation\ndocker node promote <NODE-ID>\ndocker node demote <NODE-ID>   # TOUJOURS demote avant d'arrêter un manager"},
+   {p:"Correction : la fiche indique que les tokens expirent après 5 min. En réalité, ils restent valables tant qu'on ne les renouvelle pas avec docker swarm join-token --rotate worker (à faire si un token a fuité)."},
+   {kv:[["pause","Plus de nouvelles tâches, les existantes continuent"],["drain","Tout est migré : les tâches partent sur d'autres nœuds"],["active","Fonctionnement normal"]]},
+   {code:"docker node update --availability drain <NODE-ID>\n# Labels : regrouper les nœuds pour le placement\ndocker node update --label-add env=production <NODE-ID>"}]},
+  {h:"Services : l'unité de déploiement", g:[
+   {def:"**Conteneur** = une instance unique sur une machine. **Service** = abstraction qui peut avoir plusieurs réplicas répartis sur le cluster. « Le service, c'est ce qu'on veut. Les conteneurs, c'est ce qui tourne. »"},
+   {p:"Avantages : **scalabilité** (ajouter/retirer des réplicas à la volée) · **HA** (si un réplica tombe, Swarm en relance un) · **load-balancing intégré** (routing mesh : un service est accessible sur le port publié de n'importe quel nœud)."},
+   {code:"# 3 réplicas Nginx répartis sur le cluster, publiés sur :80\ndocker service create --name web --replicas 3 --publish 80:80 nginx\n# Mode global : un conteneur par nœud (monitoring, agents de log…)\ndocker service create --name monitoring --mode global prometheus\n# Contraintes de placement\ndocker service create --name web --constraint node.role==worker nginx\ndocker service create --name api --constraint node.labels.env==production myapi"}]},
+  {h:"Rolling update, rollback & backup", g:[
+   {code:"# Rolling update : mise à jour sans interruption\ndocker service update --image nginx:1.25 \\\n    --update-delay 10s \\\n    --update-parallelism 2 \\\n    web\n# delay       : délai entre chaque batch\n# parallelism : combien de réplicas à la fois\n# Rollback : Swarm restaure la version précédente\ndocker service update --rollback web\n# Mettre en veille (garder la config, 0 ressource)\ndocker service update --replicas 0 web\ndocker service rm web          # ou suppression définitive"},
+   {def:"**Backup / restauration du cluster** : le backup Swarm sauvegarde l'état du cluster, PAS les données des conteneurs. Les volumes doivent être sauvegardés séparément."},
+   {code:"# 1. Sauvegarde sur le leader\ntar -czvf /tmp/swarm-backup.tar.gz /var/lib/docker/swarm/\n# 2. (maintenance / simulation de panne)\n# 3. Restauration\ntar -xzvf /tmp/swarm-backup.tar.gz -C /\n# 4. Réinitialiser le cluster\ndocker swarm init --force-new-cluster --advertise-addr <IP>"}]},
+  {h:"Récap commandes & à retenir", g:[
+   {kv:[
+    ["docker swarm init","Initialiser le cluster"],
+    ["docker swarm join","Rejoindre un cluster existant"],
+    ["docker node ls","Lister les nœuds"],
+    ["docker node promote / demote","Promouvoir / rétrograder"],
+    ["docker service create / ls / ps","Créer / lister / voir les tâches"],
+    ["docker service update / rm","Mettre à jour / supprimer"]]},
+   {def:"**À retenir** : Swarm = clustering Docker natif · managers planifient, workers exécutent · services = conteneurs distribués & scalables · rolling updates = maj sans coupure · toujours un nombre impair de managers pour éviter le split-brain. Swarm est parfait pour un premier pas dans l'orchestration ; pour aller plus loin : Kubernetes."}]}
  ]}
 ]
 };
