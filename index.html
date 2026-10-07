@@ -1929,6 +1929,52 @@ sections:[
    ["Atouts","Pas de Cloud Act, RGPD natif, support FR"],
    ["Limites","Catalogue réduit, Europe surtout"]]},
   {p:"Cloud Act : loi américaine extraterritoriale permettant aux autorités US d'accéder aux données d'un fournisseur américain, même hébergées dans ses régions européennes. Trade-off principal : souveraineté contre services avancés."}
+ ]},
+ {t:"OpenStack : le cloud privé", ref:"fiches 06, 07", g:[
+  {h:"Le principe", kv:[
+   ["OpenStack","Plateforme open-source pour créer son propre cloud (IaaS) : le « fais-le toi-même » d'AWS"],
+   ["Analogie","AWS/Azure = iPhone (clé en main) · OpenStack = Android (personnalisable)"],
+   ["Histoire","2010 Rackspace + NASA · Foundation 2012 · release tous les 6 mois"],
+   ["Licence","Apache 2.0 : logiciel gratuit ; support, intégration et matériel payants"],
+   ["Pourquoi","Souveraineté (hors Cloud Act), coûts si usage constant, contrôle total, conformité"],
+   ["VMware","Hausse des prix après le rachat par Broadcom → OpenStack revient comme alternative"]]},
+  {h:"Services core", kv:[
+   ["Keystone","Identité : auth, rôles, catalogue de services, tokens (TTL 1 h). SPOF → HA (= IAM)"],
+   ["Nova","Compute : cycle de vie des VMs, scheduler, flavors ; hyperviseur KVM recommandé (= EC2)"],
+   ["Neutron","Réseau SDN : networks, subnets, routers, floating IPs, security groups (= VPC)"],
+   ["Glance","Catalogue d'images (QCOW2, RAW, VMDK, ISO) + cloud-init (= AMI)"]]},
+  {h:"Services standard & optionnels", kv:[
+   ["Cinder","Volumes block persistants à attacher aux VMs (= EBS)"],
+   ["Swift","Stockage objet HTTP, 3 répliques : backups, archives (= S3)"],
+   ["Horizon","Dashboard web : apprendre en GUI, administrer en CLI"],
+   ["Heat","Orchestration / IaC en YAML (= CloudFormation, Terraform)"],
+   ["Ceilometer · Barbican","Métriques (= CloudWatch) · secrets et clés (= KMS)"],
+   ["Floating IP","IP publique assignable à une VM (= Elastic IP)"],
+   ["Flavor","Gabarit de VM : RAM, disque, vCPU"]]},
+  {h:"Privé ou public ?", kv:[
+   ["Cloud privé","CAPEX élevé, coût mensuel fixe, contrôle total, time to market en semaines"],
+   ["Cloud public","Aucun investissement, coût variable, scalabilité immédiate, contrôle limité"],
+   ["Choisir OpenStack","Souveraineté critique, charge stable, équipe IT solide"],
+   ["L'éviter","PME sans IT, charge variable, besoin de PaaS/SaaS, petite infra (< 10 VMs)"],
+   ["TCO 100 VMs / 5 ans","Public ≈ 720 k€ · privé ≈ 680 k€ : point mort vers 18-24 mois"]]}
+ ]},
+ {t:"Suites collaboratives", ref:"fiche 08", g:[
+  {h:"Les 3 approches", kv:[
+   ["Microsoft 365","SaaS complet : Exchange, OneDrive, SharePoint, Teams, Office, Entra ID"],
+   ["Google Workspace","SaaS web-first : Gmail, Drive, Docs/Sheets/Slides, Meet, Chat, une seule console"],
+   ["Nextcloud","Open-source auto-hébergé : Files, Talk, groupware (CalDAV/CardDAV), OnlyOffice/Collabora"]]},
+  {h:"Forces & faiblesses", kv:[
+   ["M365 +","La plus complète, Office desktop, intégration Windows/AD, conformité avancée"],
+   ["M365 −","Admin complexe (plusieurs portails), coût plus élevé, dépendance Microsoft"],
+   ["Workspace +","Admin simple, co-édition temps réel excellente, prix souvent plus bas"],
+   ["Workspace −","Pas d'apps desktop natives, compatibilité Office imparfaite"],
+   ["Nextcloud +","Souveraineté totale, auditable, pas de dépendance aux GAFAM"],
+   ["Nextcloud −","Maintenance à votre charge : sa qualité dépend de l'admin sys"]]},
+  {h:"Choisir vite", kv:[
+   ["Legacy Microsoft + conformité","Microsoft 365"],
+   ["Simple, rapide, remote-first","Google Workspace"],
+   ["Souveraineté prioritaire + IT mature","Nextcloud"],
+   ["Les 4 questions","Legacy Microsoft ? Données sensibles ? Équipe IT pour héberger ? Bureautique avancée critique ?"]]}
  ]}
 ],
 notes:[
@@ -1947,7 +1993,115 @@ quiz:[
  {q:"Qu'est-ce que le Cloud Act ?", o:["Une loi américaine permettant l'accès aux données des providers US, même hébergées en Europe","Une certification européenne de souveraineté","Le règlement européen sur la portabilité du cloud","Un label de l'ANSSI"], e:"Loi extraterritoriale US. SecNumCloud (ANSSI) protège contre elle ; le règlement européen sur le changement de cloud, c'est l'EU Data Act."},
  {q:"« Mes données sont dans le cloud, donc elles sont sauvegardées. » Vrai ?", o:["Faux : la redondance assure la disponibilité, pas la récupération","Vrai pour tous les modèles","Vrai seulement en IaaS","Vrai si la région est en France"], e:"Une suppression ou un chiffrement par ransomware est répliqué partout. En IaaS rien n'est sauvegardé par défaut : il faut activer un service de backup et garder 1 copie hors provider."},
  {q:"Quelle qualification de l'ANSSI garantit souveraineté et immunité au Cloud Act ?", o:["SecNumCloud","HDS","SOC 2","ISO 27001"], e:"SecNumCloud est délivré par l'ANSSI. HDS concerne les données de santé, SOC 2 est un audit américain, ISO 27001 certifie un SMSI."},
- {q:"Que signifie le passage CAPEX → OPEX ?", o:["L'investissement devient une dépense de fonctionnement","Les coûts disparaissent","On achète le matériel au lieu de le louer","On passe d'un contrat annuel à un contrat mensuel"], e:"On-prem = gros investissement initial (CAPEX). Cloud = paiement à l'usage (OPEX), plus souple mais à surveiller (egress, ressources oubliées)."}
+ {q:"Que signifie le passage CAPEX → OPEX ?", o:["L'investissement devient une dépense de fonctionnement","Les coûts disparaissent","On achète le matériel au lieu de le louer","On passe d'un contrat annuel à un contrat mensuel"], e:"On-prem = gros investissement initial (CAPEX). Cloud = paiement à l'usage (OPEX), plus souple mais à surveiller (egress, ressources oubliées)."},
+ {q:"Qu'est-ce qu'OpenStack ?", o:["Une plateforme open-source pour créer son propre cloud IaaS","Un service SaaS de Microsoft","Un hyperviseur de type 2","Un fournisseur de cloud public américain"], e:"OpenStack transforme des serveurs physiques en cloud IaaS privé (ou public, comme OVHcloud). Il s'appuie sur un hyperviseur (KVM) mais n'en est pas un."},
+ {q:"Quel service OpenStack gère l'authentification et le catalogue de services ?", o:["Keystone","Nova","Neutron","Glance"], e:"Keystone = identité (users, projets, rôles, tokens). Nova = compute, Neutron = réseau, Glance = images. Keystone est un SPOF à mettre en haute dispo."},
+ {q:"Quel service OpenStack équivaut à AWS EC2 ?", o:["Nova","Swift","Cinder","Horizon"], e:"Nova gère le cycle de vie des VMs (= EC2). Swift = stockage objet (S3), Cinder = volumes block (EBS), Horizon = dashboard (Console)."},
+ {q:"Cinder ou Swift : lequel fournit un disque à attacher à une VM ?", o:["Cinder (block storage)","Swift (object storage)","Glance","Keystone"], e:"Cinder = volumes block persistants, comme un disque (= EBS). Swift = objets accessibles en HTTP, pour backups et archives (= S3)."},
+ {q:"Dans Neutron, qu'est-ce qu'une floating IP ?", o:["Une IP publique assignable à une VM","Une IP qui change à chaque redémarrage","Une IP réservée au DHCP","Une adresse IPv6 temporaire"], e:"La floating IP rend une VM privée joignable de l'extérieur, comme l'Elastic IP d'AWS. Les security groups filtrent ensuite le trafic."},
+ {q:"Dans quel cas éviter un cloud privé OpenStack ?", o:["PME sans équipe IT, avec une charge très variable","Données soumises à une forte exigence de souveraineté","Charge stable sur plusieurs années","Grande entreprise avec une équipe IT solide"], e:"OpenStack demande un investissement initial et des compétences rares. Il devient rentable avec une charge stable sur 2-3 ans et une équipe capable de l'exploiter."},
+ {q:"Quelle suite collaborative garantit la souveraineté totale des données ?", o:["Nextcloud, auto-hébergé","Microsoft 365","Google Workspace","Les trois, si on choisit une région européenne"], e:"Avec Nextcloud, vous hébergez tout. M365 et Workspace sont des SaaS américains soumis au Cloud Act, même avec des données en Europe."},
+ {q:"Pour une entreprise « full Microsoft » avec de fortes exigences de conformité ?", o:["Microsoft 365","Google Workspace","Nextcloud","Aucune suite collaborative"], e:"M365 s'intègre à Windows/AD (Entra ID) et offre les outils de conformité les plus avancés. Workspace convient aux structures web-first, Nextcloud à la souveraineté."}
+]},
+
+/* ------------------------------------------------------------------ SC4 */
+{id:"SC4", bloc:"C", title:"Conteneurs & orchestration", c:"#2dd4bf",
+sections:[
+ {t:"Docker : les bases", ref:"fiche 01", g:[
+  {h:"Pourquoi Docker", kv:[
+   ["Docker","Logiciel pour exécuter des applications dans des conteneurs"],
+   ["Idée centrale","Livrer l'environnement de dev tel quel en prod : fini le « ça marche chez moi »"],
+   ["Logo","Une baleine porte-conteneurs : on empaquète l'appli avec tout ce dont elle a besoin"],
+   ["Atouts","Déploiement reproductible, dev identique à la prod, montée en charge facilitée"],
+   ["Pour l'admin","Plein d'applis sur le même serveur, sans qu'elles s'écrasent entre elles"]]},
+  {h:"Image & conteneur", kv:[
+   ["Image","Modèle immuable : photo du système de fichiers prête à l'emploi (la « classe »)"],
+   ["Conteneur","Instance exécutable d'une image, autant qu'on veut (l'« objet »)"],
+   ["Contenu","Code + environnement d'exécution + bibliothèques + outils + fichiers"],
+   ["Modularité","1 appli web = plusieurs conteneurs : frontend, backend, base de données"]]},
+  {h:"VM vs conteneur", table:{head:["","VM","Conteneur Docker"], rows:[
+   ["Système","OS complet (noyau + userland)","Partage le noyau de l'hôte"],
+   ["Taille","Plusieurs Go à dizaines de Go","Quelques Mo à centaines de Mo"],
+   ["Démarrage","Minutes","Secondes"],
+   ["Modèle","Disque .vdi","Image Docker (immuable)"]]}},
+  {h:"Écosystème", kv:[
+   ["Dockerfile","Recette texte pour construire une nouvelle image à partir d'une image existante"],
+   ["DockerHub","hub.docker.com : dépôt d'images publiques ou privées (le « GitHub des images »)"],
+   ["Images officielles","nginx, mariadb, node, python, php… à utiliser telles quelles ou comme base"],
+   ["Docker Compose","Plugin pour faire tourner plusieurs conteneurs ensemble (fichier YAML)"]]}
+ ]},
+ {t:"Dockerfile & build", ref:"fiche 02", g:[
+  {h:"Instructions du Dockerfile", kv:[
+   ["FROM","Image de base (point de départ)"],
+   ["RUN","Exécuter une commande pendant le build"],
+   ["COPY","Copier des fichiers locaux dans l'image"],
+   ["WORKDIR","Définir le répertoire de travail"],
+   ["EXPOSE","Déclarer un port (documentation)"],
+   ["CMD","Commande lancée au démarrage du conteneur"]]},
+  {h:"Build & layers", kv:[
+   ["docker build -t mon-app:v1 .","Construire l'image nom:tag à partir du dossier courant (contexte)"],
+   ["Layer","Chaque instruction crée une couche, mise en cache"],
+   ["Cache","Si rien n'a changé en amont, pas de rebuild de la couche"],
+   ["Ordre","Ce qui change le moins en premier (COPY package*.json avant COPY . .)"],
+   [".dockerignore","Comme .gitignore, pour le contexte de build (node_modules, .git, .env)"]]},
+  {h:"Bonnes pratiques", kv:[
+   ["Images légères","Tags :alpine"],
+   ["Couches","Combiner les RUN avec && et nettoyer le cache apt"],
+   ["Secrets","Jamais dans l'image"],
+   ["Utilisateur","Non-root si possible"]]}
+ ]},
+ {t:"Docker Compose", ref:"fiche 02", g:[
+  {h:"Principe", kv:[
+   ["docker-compose.yml","Décrit conteneurs, réseaux, volumes et dépendances (la partition de l'orchestre)"],
+   ["YAML","Comme du JSON en plus lisible ; indentation en espaces, jamais de tabulations"],
+   ["services","Un bloc par conteneur (web, db…)"],
+   ["ports \"8080:80\"","Port de l'hôte : port du conteneur"],
+   ["depends_on","Ordre de démarrage entre services"]]},
+  {h:"Commandes", kv:[
+   ["docker compose up -d","Tout lancer en arrière-plan"],
+   ["docker compose down","Tout arrêter et nettoyer"],
+   ["docker compose ps","État des services"],
+   ["docker compose logs -f","Suivre les logs"],
+   ["docker compose build","Rebuild les images custom"],
+   ["docker compose exec web bash","Entrer dans un conteneur"],
+   ["docker compose restart web","Redémarrer un service"],
+   ["docker compose pull","Mettre à jour les images"]]}
+ ]},
+ {t:"Réseaux, volumes & secrets", ref:"fiche 02", g:[
+  {h:"Réseaux", kv:[
+   ["Réseau par défaut","Compose crée un réseau par projet automatiquement"],
+   ["DNS interne","Les conteneurs se joignent par leur nom de service (host = \"db\"), pas par IP ni localhost"],
+   ["Réseaux custom","Séparer frontend et backend : la base n'est pas joignable depuis le front (segmentation)"]]},
+  {h:"Volumes", kv:[
+   ["Conteneur","Éphémère : supprimé = données perdues"],
+   ["Named volume","db_data:/var/lib/mysql : géré par Docker, recommandé en prod"],
+   ["Bind mount","./src:/var/www/html : dossier de l'hôte, pratique en dev"]]},
+  {h:"Fichier .env", kv:[
+   [".env","Variables (mots de passe, ports) : ne jamais le commiter"],
+   ["Interpolation","${MYSQL_ROOT_PASSWORD} dans docker-compose.yml"],
+   ["Suite","Orchestration à grande échelle : Swarm / Kubernetes"]]}
+ ]}
+],
+notes:[
+ "EXPOSE ne publie aucun port : c'est de la documentation. Pour rendre un service accessible depuis l'hôte, il faut -p 8080:80 avec docker run, ou ports: dans Compose.",
+ "depends_on règle seulement l'ordre de démarrage : il n'attend pas que la base soit prête à répondre. Pour ça, on ajoute un healthcheck au service db et depends_on: db: condition: service_healthy.",
+ "La syntaxe actuelle est docker compose (plugin v2, avec un espace). L'ancien binaire docker-compose (avec un tiret) n'est plus maintenu, et la ligne version: en tête du fichier YAML est désormais ignorée.",
+ "Un conteneur partage le noyau de l'hôte : l'isolation est plus faible qu'une VM. D'où les bonnes pratiques de la fiche (utilisateur non-root, images officielles et à jour, pas de secrets dans l'image)."
+],
+quiz:[
+ {q:"Quelle est la différence entre une image et un conteneur Docker ?", o:["L'image est le modèle immuable, le conteneur une instance qui tourne","Le conteneur est le modèle, l'image l'instance","L'image contient un OS complet, pas le conteneur","Ce sont deux noms pour la même chose"], e:"Image = la « classe », figée. Conteneur = l'« objet » créé à partir d'elle ; on peut en lancer autant qu'on veut depuis une même image."},
+ {q:"Pourquoi un conteneur démarre-t-il en quelques secondes, contrairement à une VM ?", o:["Il partage le noyau de l'hôte au lieu d'embarquer un OS complet","Il est toujours stocké en RAM","Il n'a pas de système de fichiers","Il ne fonctionne que sous Windows"], e:"La VM démarre tout un OS (noyau + userland), le conteneur réutilise le noyau de l'hôte : quelques Mo au lieu de plusieurs Go, des secondes au lieu de minutes."},
+ {q:"Quelle instruction du Dockerfile définit l'image de départ ?", o:["FROM","RUN","CMD","WORKDIR"], e:"FROM pose la base (ex. nginx:alpine). RUN exécute une commande au build, CMD lance la commande au démarrage, WORKDIR fixe le dossier de travail."},
+ {q:"Quelle différence entre RUN et CMD ?", o:["RUN s'exécute pendant le build, CMD au démarrage du conteneur","RUN s'exécute au démarrage, CMD pendant le build","Les deux s'exécutent au build","CMD copie des fichiers dans l'image"], e:"RUN construit l'image (ex. npm install), CMD définit ce que fait le conteneur quand il démarre (ex. node server.js). Copier des fichiers, c'est COPY."},
+ {q:"Pourquoi copier package.json AVANT le reste du code dans un Dockerfile Node ?", o:["Pour garder le npm install en cache tant que les dépendances ne changent pas","Parce que COPY . . est interdit en premier","Pour réduire la taille du package.json","Pour que l'image démarre plus vite"], e:"Chaque instruction crée une couche mise en cache. Le code change souvent, les dépendances rarement : en les copiant d'abord, la couche npm install n'est pas reconstruite à chaque modification du code."},
+ {q:"À quoi sert le fichier .dockerignore ?", o:["Exclure des fichiers du contexte de build (node_modules, .git, .env)","Lister les images à ne pas télécharger","Ignorer les erreurs pendant le build","Masquer des conteneurs dans docker ps"], e:"Comme .gitignore, mais pour docker build : on évite d'envoyer des fichiers inutiles ou sensibles (.env) dans l'image."},
+ {q:"Que fait EXPOSE 80 dans un Dockerfile ?", o:["Il documente le port utilisé, sans le publier sur l'hôte","Il ouvre le port 80 sur l'hôte","Il redirige le port 80 vers 8080","Il bloque le port 80"], e:"EXPOSE est informatif. Pour joindre le service depuis l'hôte, il faut publier le port : -p 8080:80 (docker run) ou ports: dans Compose."},
+ {q:"Dans Compose, comment le conteneur web joint-il la base de données du service db ?", o:["Par le nom de service : host = db","Par localhost","Par l'IP de l'hôte","Il faut créer un tunnel SSH"], e:"Compose crée un réseau par projet avec un DNS interne : chaque service est joignable par son nom. localhost désignerait le conteneur web lui-même."},
+ {q:"Que signifie ports: \"8080:80\" ?", o:["Le port 8080 de l'hôte renvoie vers le port 80 du conteneur","Le port 80 de l'hôte renvoie vers 8080 du conteneur","Le conteneur écoute sur les deux ports","Le trafic entre 80 et 8080 est bloqué"], e:"Format host:container. On accède au service via http://hôte:8080, qui est relayé vers le port 80 dans le conteneur."},
+ {q:"Pourquoi utiliser un volume pour une base de données en conteneur ?", o:["Un conteneur est éphémère : sans volume, ses données disparaissent avec lui","Pour accélérer les requêtes SQL","Pour partager la base sur Internet","C'est obligatoire pour démarrer MariaDB"], e:"Supprimer un conteneur supprime ses données. Un named volume (géré par Docker) assure la persistance ; c'est le choix recommandé en prod."},
+ {q:"Bind mount ou named volume : lequel pour du développement ?", o:["Le bind mount, qui relie un dossier de l'hôte au conteneur","Le named volume, toujours","Aucun des deux","Un volume réseau NFS uniquement"], e:"Le bind mount (./src:/var/www/html) permet de modifier le code sur l'hôte et de voir le résultat aussitôt. En prod on préfère le named volume, géré par Docker."},
+ {q:"Où placer les mots de passe d'une stack Compose ?", o:["Dans un fichier .env non commité, appelé via ${VARIABLE}","En clair dans le Dockerfile","Directement dans l'image","Dans le README du projet"], e:"Le .env est lu par Compose (interpolation ${MYSQL_ROOT_PASSWORD}) et reste hors du dépôt Git. Un secret dans l'image ou le Dockerfile est exposé à quiconque récupère l'image."},
+ {q:"Quelle commande arrête et nettoie toute une stack Compose ?", o:["docker compose down","docker compose stop all","docker compose ps","docker compose pull"], e:"down arrête et supprime les conteneurs et le réseau du projet (les named volumes sont conservés, sauf avec -v). ps affiche l'état, pull met à jour les images."}
 ]}
 ];
 
@@ -4922,6 +5076,138 @@ SC2:[
    {p:"Attention : la complexité et les coûts de transfert inter-cloud peuvent vite exploser. Toujours mesurer avant d'engager un multi-cloud."},
    {def:"Le bon provider = celui qui répond à VOS besoins. **Souveraineté vs services avancés** : c'est le trade-off principal."}]}
  ]}
+,{id:"06", t:"Introduction à OpenStack", sub:"Cloud privé open-source : architecture, VMware vs OpenStack, choix privé/public, TCO", parts:[
+  {h:"OpenStack : « et si on faisait son propre cloud ? »", g:[
+   {def:"**OpenStack** = plateforme open-source pour créer et gérer des clouds privés (et publics). Transforme vos serveurs physiques en IaaS : l'équivalent « fais-le toi-même » d'AWS/Azure/GCP."},
+   {p:"Analogie : AWS/Azure = iPhone (clé en main). OpenStack = Android (open-source, personnalisable)."},
+   {kv:[
+    ["Histoire","Créé en 2010 par Rackspace + NASA · OpenStack Foundation (2012) · releases semestrielles"],
+    ["Licence","Apache 2.0"],
+    ["Modèle économique","Logiciel gratuit ; support, formation, intégration payants ; matériel à votre charge"]]}]},
+  {h:"Architecture générale", g:[
+   {code:"┌─────────────────────────────────────────┐\n│         Horizon (Dashboard Web)         │\n├─────────────────────────────────────────┤\n│                APIs REST                │\n├────────┬─────────┬─────────┬────────────┤\n│  Nova  │ Neutron │ Cinder  │  Keystone  │\n│Compute │ Network │ Storage │  Identity  │\n├────────┴─────────┴─────────┴────────────┤\n│             Glance (Images)             │\n├─────────────────────────────────────────┤\n│     Hyperviseur (KVM, QEMU, Xen…)       │\n├─────────────────────────────────────────┤\n│     Infrastructure physique (x86)       │\n└─────────────────────────────────────────┘"},
+   {cols:[
+    ["Ce qu'OpenStack fait","","Créer et gérer des VMs · gérer le réseau virtuel (SDN) · gérer le stockage (block + objet) · gérer identités & accès · dashboard web + APIs REST."],
+    ["Ce qu'il ne fait pas","","Fournir le matériel (c'est à vous) · installer l'OS pour vous · gérer la couche applicative."]]}]},
+  {h:"OpenStack vs VMware", g:[
+   {table:{head:["Aspect","VMware vSphere","OpenStack"], rows:[
+    ["Licence","Propriétaire, payant","Open-source, gratuit"],
+    ["Lock-in","Fort","Faible"],
+    ["Matériel","Liste de compatibilité","Standard x86"],
+    ["APIs","Propriétaires","REST"],
+    ["Cloud-native","Non","Oui"],
+    ["Support","VMware","Communauté ou vendors"]]}},
+   {p:"Contexte 2024-2026 : hausse des coûts VMware après le rachat par Broadcom → OpenStack revient fort comme alternative sérieuse."}]},
+  {h:"Pourquoi OpenStack existe : 4 raisons", g:[
+   {cols:[
+    ["Souveraineté","","Données chez vous, hors du Cloud Act US."],
+    ["Coûts","","CAPEX vs OPEX. Rentable si usage constant."],
+    ["Contrôle total","","Personnalisation sans limite provider."],
+    ["Conformité","","Finance, défense, santé : données sensibles."]]}]},
+  {h:"Cloud privé vs cloud public", g:[
+   {table:{head:["Aspect","Cloud public","Cloud privé (OpenStack)"], rows:[
+    ["Infrastructure","Provider (multi-tenant)","Vous (dédiée)"],
+    ["Coût initial","Aucun","Élevé (CAPEX)"],
+    ["Coût mensuel","Variable (OPEX)","Fixe"],
+    ["Scalabilité","Élevée, immédiate","Limitée au matériel"],
+    ["Contrôle","Limité","Total"],
+    ["Time to market","Immédiat","Semaines/mois"],
+    ["Maintenance","Provider","Vous"]]}},
+   {p:"**Cloud hybride** = mix public + privé : données sensibles en privé, pics de charge en public, dev/test en public. Meilleur des deux mondes, mais plus complexe."}]},
+  {h:"Quand choisir, et quand éviter, OpenStack", g:[
+   {cols:[
+    ["Choisir OpenStack","","Souveraineté critique · usage constant (TCO favorable) · contrôle total requis · équipe IT solide en place."],
+    ["Éviter","","Startup/PME sans IT · charge variable · besoin de services avancés (PaaS/SaaS managés) · time to market critique · besoin mondial."]]},
+   {def:"**Ordre de grandeur TCO** : 100 VMs (4 vCPU / 16 Go) sur 5 ans : cloud public ≈ 720 k€ · cloud privé OpenStack ≈ 680 k€ (serveurs 150 k + réseau/stockage 50 k + install/formation 30 k + admin 300 k + élec/DC 100 k + maintenance 50 k). Rentable sur le long terme si charge stable + compétences internes."}]}
+ ]},
+ {id:"07", t:"Services OpenStack", sub:"Keystone, Nova, Neutron, Glance, Cinder, Swift, Horizon : deep dive et équivalents AWS/Azure/GCP", parts:[
+  {h:"Une constellation, pas un monolithe", g:[
+   {p:"OpenStack = ~30 projets officiels qui travaillent ensemble. On distingue : **Core** (obligatoires), **Standard** (quasi indispensables en prod), **Optionnels** (selon besoins)."},
+   {kv:[
+    ["Core","Keystone (identité) · Nova (compute) · Neutron (réseau) · Glance (images)"],
+    ["Standard","Cinder (block) · Swift (objet) · Horizon (dashboard)"],
+    ["Optionnels","Heat, Ceilometer, Barbican, Designate, Manila, Trove, Octavia…"]]}]},
+  {h:"Keystone : identité (le gardien)", g:[
+   {p:"**Rôle** : authentification, autorisation, catalogue de services. Tout passe par Keystone. Concepts : Users · Projects/Tenants (conteneurs de ressources) · Roles · Domains."},
+   {code:"# Workflow : user → login → Keystone émet un TOKEN (TTL 1h)\n#            → user appelle Nova avec le TOKEN\nopenstack user create alice --password secret123\nopenstack project create projet-web\nopenstack role add --user alice --project projet-web member"},
+   {p:"Points clés : centralisé · multi-tenant · extensible (LDAP, SQL) · token-based · **SPOF potentiel → HA obligatoire en prod**."}]},
+  {h:"Nova : compute (le cœur)", g:[
+   {p:"**Rôle** : cycle de vie des VMs. Composants : **nova-api** (REST 8774) · **nova-scheduler** (placement, filters + weights) · **nova-conductor** (coordination, DB proxy) · **nova-compute** (agent sur chaque nœud)."},
+   {kv:[
+    ["KVM","Recommandé : principal, performant, Linux"],
+    ["QEMU / LXC / Xen","Fallback · containers système · historique"],
+    ["VMware / Hyper-V","Migration VMware · Windows (limité)"]]},
+   {p:"**Flavors** : templates de taille VM (RAM / disque / vCPU). **États VM** : BUILD → ACTIVE → SHUTOFF / SUSPENDED / PAUSED / ERROR / DELETED."},
+   {code:"openstack flavor create --ram 4096 --disk 50 --vcpus 2 custom.medium\nopenstack server create --flavor m1.medium --image Ubuntu --network priv my-vm"}]},
+  {h:"Neutron : réseau (SDN)", g:[
+   {p:"Concepts : **Networks** (L2 VLAN/VXLAN/flat) · **Subnets** (plages IP) · **Ports** (interfaces virtuelles) · **Routers** (routage entre networks). Agents : neutron-server + dhcp-agent + l3-agent + openvswitch-agent."},
+   {code:"# Floating IP = IP publique assignable à une VM (= Elastic IP AWS)\n# VM privée 192.168.1.10 ← floating 203.0.113.25\n\n# Security Group = firewall virtuel autour des VMs\nopenstack security group create web-sg\nopenstack security group rule create --protocol tcp --dst-port 80 --remote-ip 0.0.0.0/0 web-sg\nopenstack security group rule create --protocol tcp --dst-port 22 --remote-ip 203.0.113.0/24 web-sg\nopenstack server add security group my-vm web-sg\n\n# Workflow réseau type :\n# net → subnet → router → attach subnet → attach ext → VM → floating IP"},
+   {p:"Services avancés : LBaaS (Octavia), FWaaS, VPNaaS. Points clés : SDN complet, isolation multi-tenant, flexible, mais complexe à débugger."}]},
+  {h:"Glance · Cinder · Swift · Horizon", g:[
+   {cols:[
+    ["Glance","images (= AMI)","Catalogue d'images bootables (QCOW2, RAW, VHD, VMDK, ISO). Backends : Swift ou Ceph en prod. cloud-init : initialisation auto (clé SSH, packages, scripts) au premier boot."],
+    ["Cinder","block (= EBS)","Volumes persistants à attacher à une VM (souvent 1 volume = 1 VM). Backends : LVM (dev), Ceph RBD (prod), SAN entreprise. Snapshots (rapide, même backend) ≠ backups (plus lent, stockage séparé). QoS configurable (IOPS)."],
+    ["Swift","objet (= S3)","Hiérarchie Account → Container → Object. API HTTP. Réplication 3 copies. Idéal : backups, archives, media, data lakes."],
+    ["Horizon","dashboard web","UI web (vues Project / Admin / Identity). Facile pour apprendre et créer, pas d'automation → pour la prod, préférer la CLI + Heat."]]},
+   {code:"openstack image create --file ubuntu.qcow2 --disk-format qcow2 --container-format bare Ubuntu\nopenstack volume create --size 100 my-vol && openstack server add volume my-vm my-vol\nopenstack container create backups && openstack object create backups backup.tar.gz"}]},
+  {h:"Équivalents clouds & services optionnels", g:[
+   {table:{head:["OpenStack","AWS","Azure","GCP"], rows:[
+    ["Keystone","IAM","Entra ID","IAM"],
+    ["Nova","EC2","Virtual Machines","Compute Engine"],
+    ["Neutron","VPC","Virtual Network","VPC"],
+    ["Glance","AMI","Images","Images"],
+    ["Cinder","EBS","Managed Disks","Persistent Disks"],
+    ["Swift","S3","Blob Storage","Cloud Storage"],
+    ["Horizon","Console","Portal","Console"]]}},
+   {kv:[
+    ["Heat","Orchestration YAML : IaC (= CloudFormation, Terraform)"],
+    ["Ceilometer","Télémétrie / métriques (= CloudWatch)"],
+    ["Barbican","Secrets, clés, certificats (= KMS / Key Vault)"],
+    ["Designate","DNS as a Service (= Route 53)"],
+    ["Manila","NFS / CIFS managés (= EFS / Azure Files)"],
+    ["Trove","Bases de données managées (= RDS)"]]},
+   {def:"**À retenir** : apprendre avec Horizon, administrer avec la CLI, automatiser avec Heat/Terraform. Keystone est le SPOF à mettre en HA en priorité."}]}
+ ]},
+ {id:"08", t:"Suites collaboratives", sub:"Microsoft 365, Google Workspace, Nextcloud : panorama et critères de choix", parts:[
+  {h:"Une suite collaborative, c'est quoi ?", g:[
+   {def:"Un pack d'outils cloud pour travailler ensemble : email + calendrier · fichiers & partage · bureautique collaborative · chat/visio · gestion des identités."},
+   {p:"Les entreprises y cherchent : simplicité d'usage, sécurité & conformité, collaboration fluide, contrôle des données, coût total maîtrisé."},
+   {kv:[["SaaS propriétaire","Microsoft 365, Google Workspace"],["Open-source auto-hébergé","Nextcloud"],["Hybride","SaaS + outils open-source selon besoin"]]}]},
+  {h:"Microsoft 365 : la suite entreprise complète", g:[
+   {h:"Services principaux", ul:["Exchange (email + calendrier)","OneDrive (stockage perso)","SharePoint (intranet, sites d'équipe, GED)","Teams (chat + visio + canaux)","Office (web + desktop)","Entra ID (identités)"]},
+   {cols:[
+    ["Points forts","","Suite la plus complète · Office desktop pour power users · très bonne intégration Windows/AD · sécurité & conformité avancées."],
+    ["Points faibles","","Admin complexe (plusieurs portails) · coût souvent plus élevé · dépendance Microsoft."]]},
+   {p:"**Pour qui** : entreprises déjà « full Microsoft », besoin de bureautique avancée, exigences fortes de conformité."}]},
+  {h:"Google Workspace : cloud-native, simple", g:[
+   {h:"Services principaux", ul:["Gmail (recherche puissante, labels/filtres)","Drive (stockage + partage)","Docs / Sheets / Slides (co-édition temps réel)","Meet + Chat","Admin Console unique"]},
+   {cols:[
+    ["Points forts","","Administration simple (un portail) · collaboration temps réel excellente · recherche Gmail très puissante · prix souvent plus bas."],
+    ["Points faibles","","Pas d'apps desktop natives · compatibilité Office imparfaite · moins d'outils de compliance poussés."]]},
+   {p:"**Pour qui** : startups et PME modernes, équipes remote-first, environnements sans legacy Microsoft."}]},
+  {h:"Nextcloud : la voie souveraine open-source", g:[
+   {def:"**Nextcloud** = suite collaborative auto-hébergée. Principe : vous hébergez tout, donc vous contrôlez tout."},
+   {kv:[
+    ["Files","Fichiers, partage, liens publics (expiration, mdp), versioning, corbeille"],
+    ["Talk","Chat équipe + visio + partage d'écran · backend HPB pour gros groupes"],
+    ["Groupware","Mail (IMAP) · Calendrier (CalDAV) · Contacts (CardDAV)"],
+    ["Office","OnlyOffice (proche MS Office) ou Collabora (LibreOffice en ligne)"]]},
+   {p:"**Stockage** : disque local · NFS/SMB · S3 compatible (MinIO, Scaleway…). **Intégration** : LDAP / Active Directory, SSO SAML (IdP externe type Keycloak → voir SC3-12)."},
+   {cols:[
+    ["Points forts","","Souveraineté totale (données chez vous) · open-source, auditable · personnalisation possible · pas de dépendance aux GAFAM."],
+    ["Points faibles","","Maintenance IT à votre charge · mise en place plus technique · moins de services avancés natifs."]]},
+   {p:"**Point clé** : la qualité de Nextcloud dépend surtout de la qualité de votre admin sys : sauvegardes, mises à jour, monitoring, politiques de partage, quotas. Sans équipe IT solide, M365 ou Workspace conviendront mieux."},
+   {p:"**Pour qui** : secteurs sensibles (santé, public, défense), organisations avec IT mature, besoin de contrôle fort des données."}]},
+  {h:"Choisir vite : tableau & les 4 questions", g:[
+   {table:{head:["Aspect","Microsoft 365","Google Workspace","Nextcloud"], rows:[
+    ["Modèle","SaaS","SaaS","Auto-hébergé"],
+    ["Bureautique","Desktop + Web","Web","OnlyOffice / Collabora"],
+    ["Collaboration","Très bon","Excellent","Bon"],
+    ["Admin","Complexe","Simple","Technique"],
+    ["Souveraineté","Faible","Faible","Forte"]]}},
+   {steps:["Ai-je du legacy Microsoft ?","Mes données sont-elles sensibles ?","Ai-je une équipe IT capable d'héberger ?","La bureautique avancée est-elle critique ?"]},
+   {def:"**Le bon choix = le bon contexte** : M365 si legacy Microsoft + besoin compliance · Google Workspace si vous voulez simple + rapide + collaboratif · Nextcloud si la souveraineté est prioritaire et que l'IT suit."}]}
+ ]}
 /*@SC2*/
 ],
 SC3:[
@@ -5357,6 +5643,62 @@ SC3:[
    {def:"**WAF vs firewall réseau** : ne pas confondre. Le WAF ne remplace pas le firewall L3/L4 ; ils sont complémentaires. Le firewall protège le périmètre réseau, le WAF protège la couche applicative. On ne protège pas une app web avec juste iptables."}]}
  ]}
 /*@SC3*/
+],
+SC4:[
+ {id:"01", t:"Docker : introduction", sub:"Conteneurs vs VMs, images & Dockerfile, DockerHub, applis multi-conteneurs", parts:[
+  {h:"Docker : pourquoi", g:[
+   {def:"**Docker** = logiciel pour exécuter des applications dans des conteneurs. Idée centrale : on règle les éternels problèmes de version (« ça marche chez moi ») en livrant l'environnement de dev directement en prod."},
+   {p:"Analogie : le logo est une baleine porte-conteneurs. On empaquète une application avec tout ce dont elle a besoin, et on la livre partout à l'identique."},
+   {ul:["Déploiement reproductible dev → prod","Environnement de dev identique à la prod","Montée en charge facilitée (plusieurs instances)","Pour l'admin sys : faire tourner plein d'applis sur le même serveur, sans les faire s'écraser les unes les autres"]}]},
+  {h:"Image & conteneur : les deux termes clés", g:[
+   {cols:[
+    ["Image","le modèle","Fichier immuable (= photo instantanée du système de fichiers prête à l'emploi). En POO : l'image est la classe."],
+    ["Conteneur","l'instance","Instance exécutable d'une image. On peut en lancer un nombre infini à partir d'une même image. En POO : le conteneur est l'objet."]]},
+   {p:"**Que contient un conteneur ?** Le code applicatif + l'environnement d'exécution (Apache, Node, PHP…) + les bibliothèques + les outils (NPM, Composer…) + fichiers divers. Tout ce dont l'app a besoin pour tourner."},
+   {p:"**Modularité** : une appli web ≠ 1 gros conteneur. On la découpe : un conteneur frontend (Apache + HTML/CSS/JS), un backend (PHP ou Node + bibliothèques), une base de données. Chacun mis à jour / scalé indépendamment."}]},
+  {h:"Virtualisation vs conteneurisation", g:[
+   {table:{head:["","VM (VirtualBox…)","Conteneur Docker"], rows:[
+    ["Système","Embarque un OS complet (noyau + userland)","Partage le noyau de l'hôte"],
+    ["Taille","Plusieurs Go à dizaines de Go","Quelques Mo à centaines de Mo"],
+    ["Démarrage","Minutes","Secondes"],
+    ["Disque / modèle",".vdi (image VM)","Image Docker (immuable)"]]}},
+   {p:"Dans les deux cas : plusieurs instances (VMs/conteneurs) à partir d'un même modèle (.vdi / image). Mais le conteneur est beaucoup plus léger."}]},
+  {h:"Images immuables → Dockerfile", g:[
+   {p:"Les images sont **immuables** : on ne les modifie pas. Pour en créer une nouvelle, on part d'une image existante et on décrit ce qu'on ajoute dans un fichier texte : le **Dockerfile**."},
+   {code:"# Exemple : image de frontend\nFROM httpd:2.4                                # on part de l'image Apache officielle\nCOPY ./site/ /usr/local/apache2/htdocs/      # on ajoute notre code\n# L'image Apache a elle-même été construite avec un Dockerfile."},
+   {p:"La syntaxe complète (FROM, COPY, RUN, CMD, EXPOSE, WORKDIR…) est détaillée dans la fiche 02."}]},
+  {h:"DockerHub : le GitHub des images", g:[
+   {def:"**DockerHub** (hub.docker.com) = site web pour héberger des images Docker dans des repositories, publics ou privés. Offre gratuite : 1 seul repo privé."},
+   {p:"On y trouve plein d'images officielles prêtes à l'emploi (nginx, mariadb, node, python, php…) qu'on utilise soit directement, soit comme base dans son propre Dockerfile. Pas besoin de créer sa propre image pour tout."}]},
+  {h:"Docker Compose : applis multi-conteneurs", g:[
+   {p:"Une appli web = typiquement 3 conteneurs : frontend, backend, base de données → donc 3 images différentes. On utilise **Docker Compose** (un plugin de Docker) pour les faire fonctionner ensemble."},
+   {ul:["Fichier de config au format YAML (alternative lisible au JSON)","On y décrit tous les conteneurs du projet et leurs liens","Permet de démarrer/arrêter toute l'appli en une commande","Scaler : lancer plusieurs instances du front ou du back selon la charge"]},
+   {def:"**À retenir** : image = le modèle immuable · conteneur = l'instance qui tourne · Dockerfile = la recette pour construire une image · DockerHub = le dépôt d'images · Compose = orchestrer plusieurs conteneurs ensemble."}]}
+ ]},
+ {id:"02", t:"Docker : build & Compose", sub:"Dockerfile, build, layers, docker-compose.yml, volumes, réseaux, .env", parts:[
+  {h:"Le Dockerfile : la recette", g:[
+   {p:"Fichier texte qui décrit, étape par étape, comment construire une image. On part d'une base, on ajoute des ingrédients, on configure."},
+   {kv:[["FROM","Image de base (point de départ)"],["RUN","Exécuter une commande pendant le build"],["COPY","Copier des fichiers locaux dans l'image"],["WORKDIR","Définir le répertoire de travail"],["EXPOSE","Déclarer un port (documentation)"],["CMD","Commande lancée au démarrage du conteneur"]]},
+   {code:"# Serveur web statique : 4 lignes\nFROM nginx:alpine\nCOPY ./mon-site/ /usr/share/nginx/html/\nEXPOSE 80\nCMD [\"nginx\", \"-g\", \"daemon off;\"]\n\n# App Node.js : tirer parti du cache sur les dépendances\nFROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./     # copier D'ABORD le package.json\nRUN npm install           # → le npm install reste en cache\nCOPY . .                  # seulement maintenant, le code\nEXPOSE 3000\nCMD [\"node\", \"server.js\"]"}]},
+  {h:"Build, layers & .dockerignore", g:[
+   {code:"docker build -t mon-app:v1 .\n#               nom:tag   contexte (dossier courant)"},
+   {def:"**Layers** : chaque instruction du Dockerfile crée une couche. Les couches sont mises en cache : si rien n'a changé en amont, pas de rebuild. Ordre des instructions : les choses qui changent le moins souvent en premier (d'où le COPY package*.json avant le COPY . .)."},
+   {code:"# .dockerignore : comme .gitignore, mais côté contexte de build\nnode_modules\n.git\n.env\n*.md"},
+   {p:"**Bonnes pratiques Dockerfile** : images légères (:alpine) · combiner les RUN pour limiter les couches · jamais de secrets dans l'image · utilisateur non-root si possible."},
+   {code:"# À éviter : 3 couches, pas de nettoyage\nRUN apt-get update\nRUN apt-get install -y curl\nRUN apt-get install -y vim\n# Mieux : 1 couche + nettoyage du cache apt\nRUN apt-get update && apt-get install -y \\\n        curl vim \\\n    && rm -rf /var/lib/apt/lists/*"}]},
+  {h:"Docker Compose : orchestrer", g:[
+   {p:"Une app moderne : frontend + backend + BDD + cache. Gérer tout ça à la main avec docker run ? Non. **Compose** décrit tout dans un **docker-compose.yml** : conteneurs, réseaux, volumes, dépendances. Analogie : le chef d'orchestre qui coordonne les musiciens."},
+   {code:"# Stack LAMP minimale\nservices:\n  web:\n    image: php:8.2-apache\n    ports:\n      - \"8080:80\"              # host:container\n    volumes:\n      - ./src:/var/www/html    # bind mount (dev)\n    depends_on:\n      - db\n  db:\n    image: mariadb:11\n    environment:\n      MYSQL_ROOT_PASSWORD: secret\n      MYSQL_DATABASE: myapp\n    volumes:\n      - db_data:/var/lib/mysql # named volume (prod)\nvolumes:\n  db_data:"},
+   {p:"**YAML** : comme du JSON mais plus lisible, sensible à l'indentation (espaces, pas de tabs)."},
+   {p:"Correction (précision) : depends_on règle seulement l'ordre de démarrage, il n'attend pas que la base soit prête. Pour ça : un healthcheck sur db et depends_on: db: condition: service_healthy."}]},
+  {h:"Commandes Compose · réseaux · volumes · .env", g:[
+   {code:"docker compose up -d          # tout lancer en arrière-plan\ndocker compose down           # tout arrêter et nettoyer\ndocker compose ps             # état des services\ndocker compose logs -f        # suivre les logs\ndocker compose build          # rebuild les images custom\ndocker compose exec web bash  # entrer dans un conteneur\ndocker compose restart web    # redémarrer un service\ndocker compose pull           # mettre à jour les images"},
+   {cols:[
+    ["Réseaux","par défaut","Compose crée automatiquement un réseau par projet. Les conteneurs se trouvent par leur nom de service (DNS interne), pas par IP ni localhost. Réseaux custom : frontend et backend séparés → le service db n'est pas joignable depuis le réseau frontend = segmentation."],
+    ["Volumes","2 types","**Named volume** (db_data:/var/lib/mysql) : géré par Docker, recommandé en prod. **Bind mount** (./src:/var/www/html) : lien vers un dossier de l'hôte, pratique en dev. Un conteneur est éphémère : supprimé → données perdues. Les volumes assurent la persistance."]]},
+   {code:"# dans le code PHP, host = \"db\"\nnew PDO(\"mysql:host=db;dbname=myapp\", \"root\", \"secret\");\n\n# Fichier .env : ne jamais commiter !\nMYSQL_ROOT_PASSWORD=supersecret\nMYSQL_DATABASE=myapp\nAPP_PORT=8080\n\n# Dans docker-compose.yml : interpolation ${VAR}\nservices:\n  db:\n    environment:\n      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}\n      MYSQL_DATABASE: ${MYSQL_DATABASE}\n  web:\n    ports: [\"${APP_PORT}:80\"]"},
+   {def:"**En résumé** : Dockerfile = recette pour construire une image · docker build = cuire la recette · Docker Compose = orchestrer plusieurs conteneurs · docker-compose.yml = la partition de l'orchestre. Prochaine étape : orchestration à grande échelle avec Swarm / Kubernetes."}]}
+ ]}
 ]
 };
 
