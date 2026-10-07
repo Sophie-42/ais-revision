@@ -240,6 +240,16 @@ pre.code{margin:0;background:#050810;border:1px solid var(--line);border-radius:
 .syn-item b{display:block;font-family:var(--f-display);font-size:16px;line-height:1.25}
 .syn-item small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 .syn-item .chev{color:var(--dim)}
+.syn-item.done{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.syn-item.done .chev{color:var(--ok);font-weight:600}
+.acq-head{display:flex;justify-content:space-between;margin:16px 0 8px;font-size:12px;color:var(--muted)}
+.acq-head + .bar{margin-bottom:0}
+.acq-btn{display:flex;align-items:center;gap:10px;width:100%;margin-top:14px;padding:12px 14px;border-radius:10px;border:1px dashed var(--line);background:var(--surface);font-family:var(--f-mono);font-size:13px;font-weight:600;color:var(--muted);text-align:left}
+.acq-btn.acq-top{width:auto;margin-top:10px;padding:8px 12px;font-size:12px}
+.acq-btn.acq-bottom{margin-top:26px;justify-content:center;border-style:solid;border-color:color-mix(in srgb,var(--ok) 50%,var(--line));color:var(--ok)}
+.acq-btn .box{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;border:1.5px solid currentColor;font-size:12px;line-height:1}
+.acq-btn.on{border-style:solid;border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--surface));color:var(--ok)}
+.acq-btn.on .box{background:var(--ok);border-color:var(--ok);color:#06101a}
 .syn-empty{margin-top:16px}
 .reader-h{margin:16px 0 4px}
 .reader-h small{font-family:var(--f-mono);font-size:11px;color:var(--c);letter-spacing:.1em}
@@ -5355,6 +5365,22 @@ const store = {
   set(k, v){ try{ localStorage.setItem("aisrev:" + k, JSON.stringify(v)); }catch(e){} }
 };
 let best = store.get("best", {});
+let acq = store.get("acq", {});   // synthèses acquises : { SA1: ["E01", ...] }
+
+const acqList = s => (acq[s.id] || []).filter(id => s.syn.some(f => f.id === id));
+const isAcq = (s, f) => (acq[s.id] || []).includes(f.id);
+function toggleAcq(s, f){
+  const l = new Set(acq[s.id] || []);
+  l.has(f.id) ? l.delete(f.id) : l.add(f.id);
+  acq[s.id] = [...l];
+  store.set("acq", acq);
+}
+/* Progression d'une saison : part des synthèses acquises (le QCM n'entre pas dans le calcul). */
+function progress(s){
+  const n = s.syn.length, a = acqList(s).length;
+  if(!n || !a) return null;
+  return Math.round(a / n * 100);
+}
 
 const state = { view:"home", sid:null, tab:"cards", query:"", flash:null, quiz:null, syn:null };
 
@@ -5425,8 +5451,8 @@ function renderBlocs(){
         const sc = best[s.id];
         return `<button class="tile" style="--c:${s.c}" data-act="open" data-id="${s.id}">
           <span class="code-badge">${s.id}</span>
-          <span class="tile-t"><b>${esc(s.title)}</b><span>${notionCount(s)} notions${s.syn.length ? ` · ${s.syn.length} synthèses` : ""} · QCM ${s.quiz.length} q</span></span>
-          ${ring(sc ? sc.pct : null)}
+          <span class="tile-t"><b>${esc(s.title)}</b><span>${s.syn.length ? `${acqList(s).length}/${s.syn.length} synthèses ✓` : `${notionCount(s)} notions`} · QCM ${sc ? sc.pct + " %" : "—"}</span></span>
+          ${ring(progress(s))}
         </button>`;
       }).join("")}</div>
     </section>`;
@@ -5516,14 +5542,22 @@ function grpHTML(g){
 }
 
 /* ---------- Synthèses ---------- */
+function acqBtn(s, f, where){
+  const on = isAcq(s, f);
+  return `<button class="acq-btn acq-${where}${on ? " on" : ""}" data-act="acq" aria-pressed="${on}">
+    <span class="box">${on ? "✓" : ""}</span><span>${on ? "Synthèse acquise" : where === "top" ? "Marquer comme acquise" : "J'ai acquis ces notions"}</span></button>`;
+}
 function synHTML(s){
   if(!s.syn.length){
     return `<div class="panel syn-empty"><p class="mono" style="color:var(--c);font-size:12px">$ ls ./syntheses/${s.id.toLowerCase()}<br>// dossier vide</p>
       <h3>Synthèses à venir</h3><p>Les fiches de synthèse de cette saison n'ont pas encore été ajoutées. En attendant, les cartes, les flashcards et le QCM sont disponibles.</p></div>`;
   }
   if(state.syn === null){
-    return `<div class="syn-list">${s.syn.map((f,i) => `<button class="syn-item" data-act="syn-open" data-i="${i}">
-      <span class="ep">${esc(f.id)}</span><span><b>${esc(f.t)}</b><small>${esc(f.sub)}</small></span><span class="chev mono">›</span></button>`).join("")}</div>`;
+    const a = acqList(s).length, n = s.syn.length;
+    return `<div class="acq-head"><span class="mono">${a}/${n} synthèses acquises</span><span class="mono">${Math.round(a / n * 100)} %</span></div>
+    <div class="bar"><i style="width:${Math.round(a / n * 100)}%"></i></div>
+    <div class="syn-list">${s.syn.map((f,i) => `<button class="syn-item${isAcq(s,f) ? " done" : ""}" data-act="syn-open" data-i="${i}">
+      <span class="ep">${esc(f.id)}</span><span><b>${esc(f.t)}</b><small>${esc(f.sub)}</small></span><span class="chev mono">${isAcq(s,f) ? "✓" : "›"}</span></button>`).join("")}</div>`;
   }
   const i = state.syn, f = s.syn[i], prev = s.syn[i-1], next = s.syn[i+1];
   state.reading = true;
@@ -5531,7 +5565,9 @@ function synHTML(s){
   state.reading = false;
   return `<button class="back" data-act="syn-list" style="margin-top:14px">‹ Toutes les synthèses</button>
   <header class="reader-h"><small>${s.id} · ${esc(f.id)} · FICHE DE SYNTHÈSE</small><h2>${esc(f.t)}</h2><p>${esc(f.sub)}</p></header>
+  ${acqBtn(s, f, "top")}
   ${body}
+  ${acqBtn(s, f, "bottom")}
   <nav class="reader-nav">
     ${prev ? `<button class="btn" data-act="syn-open" data-i="${i-1}">‹ ${esc(prev.id)} ${esc(prev.t)}</button>` : `<span></span>`}
     ${next ? `<button class="btn pri" data-act="syn-open" data-i="${i+1}">${esc(next.id)} ${esc(next.t)} ›</button>` : `<button class="btn pri" data-act="tab" data-tab="quiz">QCM de la saison ›</button>`}
@@ -5731,6 +5767,10 @@ $app.addEventListener("click", e => {
     renderSeason(); window.scrollTo(0,0); return;
   }
   if(act === "syn-open"){ state.syn = +b.dataset.i; renderPane(); window.scrollTo(0,0); return; }
+  if(act === "acq"){
+    toggleAcq(s, s.syn[state.syn]);
+    const y = window.scrollY; renderPane(); window.scrollTo(0, y); return;
+  }
   if(act === "syn-list"){ state.syn = null; renderPane(); window.scrollTo(0,0); return; }
   if(act === "home"){ state.view = "home"; state.sid = null; renderHome(); window.scrollTo(0,0); return; }
   if(act === "tab"){
