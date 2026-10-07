@@ -128,9 +128,15 @@ mark{background:rgba(255,194,62,.25);color:inherit;border-radius:2px}
 .top-title{min-width:0;flex:1}
 .top-title small{display:block;font-family:var(--f-mono);font-size:10.5px;color:var(--c);letter-spacing:.12em}
 .top-title b{display:block;font-family:var(--f-display);font-size:18px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);margin-top:10px}
-.tab{background:none;border:0;border-bottom:2px solid transparent;padding:9px 0 10px;font-family:var(--f-mono);font-size:12.5px;color:var(--muted);letter-spacing:.06em}
-.tab[aria-selected="true"]{color:var(--c);border-bottom-color:var(--c)}
+.top .back{flex:none;display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:10px;font-size:13px;font-weight:600;color:var(--fg);
+  background:color-mix(in srgb,var(--c) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 70%,var(--line));
+  box-shadow:0 0 14px -6px var(--c)}
+.top .back:hover,.top .back:active{background:color-mix(in srgb,var(--c) 28%,var(--surface));border-color:var(--c)}
+.top .back .ic{color:var(--c);font-size:15px;line-height:1}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:12px 0 10px;padding:4px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.tab{background:none;border:0;border-radius:9px;padding:10px 0;font-family:var(--f-mono);font-size:13px;font-weight:600;color:#c3cbea;letter-spacing:.02em;transition:background .15s,color .15s}
+.tab:hover{background:var(--surface-2);color:var(--fg)}
+.tab[aria-selected="true"]{background:var(--c);color:#06101a;box-shadow:0 0 16px -6px var(--c)}
 .glow{height:120px;margin-bottom:-120px;background:radial-gradient(60% 100% at 50% 0,color-mix(in srgb,var(--c) 16%,transparent),transparent);pointer-events:none}
 
 .jump{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:6px;scrollbar-width:none}
@@ -5504,7 +5510,7 @@ function renderSeason(){
   $app.innerHTML = `<div style="--c:${s.c}">
     <header class="top"><div class="top-in">
       <div class="top-row">
-        <button class="back" data-act="home" aria-label="Retour au sommaire">‹ Sommaire</button>
+        <button class="back" data-act="home" aria-label="Retour au sommaire"><span class="ic">‹</span>Sommaire</button>
         <div class="top-title"><small>${s.id} · BLOC ${s.bloc}</small><b>${esc(s.title)}</b></div>
       </div>
       <div class="tabs" role="tablist">${tabs.map(([k,l]) => `<button class="tab" role="tab" aria-selected="${state.tab===k}" data-act="tab" data-tab="${k}">${l}</button>`).join("")}</div>
