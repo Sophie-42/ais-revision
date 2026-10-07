@@ -5848,7 +5848,7 @@ function renderResults(){
 /* ---------- Saison ---------- */
 function renderSeason(){
   const s = byId[state.sid];
-  const tabs = [["cards","Cartes"],["syn","Synthèses"],["flash","Flash"],["quiz","QCM"]];
+  const tabs = [["cards","Mémo"],["syn","Synthèses"],["flash","Flash"],["quiz","QCM"]];
   $app.innerHTML = `<div style="--c:${s.c}">
     <header class="top"><div class="top-in">
       <div class="top-row">
@@ -5898,7 +5898,7 @@ function acqBtn(s, f, where){
 function synHTML(s){
   if(!s.syn.length){
     return `<div class="panel syn-empty"><p class="mono" style="color:var(--c);font-size:12px">$ ls ./syntheses/${s.id.toLowerCase()}<br>// dossier vide</p>
-      <h3>Synthèses à venir</h3><p>Les fiches de synthèse de cette saison n'ont pas encore été ajoutées. En attendant, les cartes, les flashcards et le QCM sont disponibles.</p></div>`;
+      <h3>Synthèses à venir</h3><p>Les fiches de synthèse de cette saison n'ont pas encore été ajoutées. En attendant, le mémo, les flashcards et le QCM sont disponibles.</p></div>`;
   }
   if(state.syn === null){
     const a = acqList(s).length, n = s.syn.length;
@@ -5994,7 +5994,7 @@ function genQuestion(s, p){
   const d = shuffle(pool).slice(0, 3);
   if(d.length < 3) return null;
   const askTerm = Math.random() < 0.5;
-  const src = `Carte « ${p.sec} › ${p.ctx} »`;
+  const src = `Mémo « ${p.sec} › ${p.ctx} »`;
   if(askTerm){
     return {
       q: `${p.ctx} : quel terme correspond à « ${p.v} » ?`,
@@ -6038,7 +6038,7 @@ function quizHTML(s){
       <p class="mono" style="color:var(--c);font-size:12px">$ ./qcm --saison ${s.id.toLowerCase()}</p>
       <h3>QCM · ${esc(s.title)}</h3>
       <p>${QUIZ_LEN} questions tirées au hasard à chaque lancement : un nouveau QCM à chaque fois. Tu réponds à tout, puis tu reçois la correction détaillée avec l'explication de chaque erreur.</p>
-      <div class="meta"><span>Banque <b>${s.quiz.length} rédigées + ${cardPairs(s).length} issues des cartes</b></span><span>Meilleur score <b>${sc ? sc.pct + " %" : "—"}</b></span>${sc ? `<span>Le <b>${new Date(sc.date).toLocaleDateString("fr-FR")}</b></span>` : ""}</div>
+      <div class="meta"><span>Banque <b>${s.quiz.length} rédigées + ${cardPairs(s).length} issues du mémo</b></span><span>Meilleur score <b>${sc ? sc.pct + " %" : "—"}</b></span>${sc ? `<span>Le <b>${new Date(sc.date).toLocaleDateString("fr-FR")}</b></span>` : ""}</div>
       <div class="btn-row"><button class="btn pri" data-act="quiz-start">Lancer le QCM ›</button></div>
     </div>`;
   }
