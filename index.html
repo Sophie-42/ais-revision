@@ -2140,7 +2140,13 @@ quiz:[
  {q:"Quelle disponibilité donner à un nœud avant une maintenance ?", o:["drain : ses tâches sont migrées sur les autres nœuds","pause : tout s'arrête immédiatement","active","demote"], e:"drain vide le nœud en déplaçant ses tâches. pause empêche seulement les nouvelles tâches. demote sert à rétrograder un manager en worker."},
  {q:"Que contient la sauvegarde de /var/lib/docker/swarm ?", o:["L'état du cluster, pas les données des conteneurs","Toutes les données des volumes","Les images Docker","Les logs des services"], e:"Le backup Swarm protège la configuration du cluster (nœuds, services, secrets). Les volumes doivent être sauvegardés séparément."},
  {q:"Comment mettre à jour l'image d'un service Swarm sans coupure ?", o:["docker service update --image … avec un rolling update","docker service rm puis docker service create","docker swarm init --force-new-cluster","docker node demote sur chaque nœud"], e:"Le rolling update remplace les réplicas par lots (--update-parallelism) avec un délai (--update-delay). En cas de problème : docker service update --rollback."}
-]}
+]},
+
+/* ------------------------------------------------------------------ SC5 (à venir) */
+{id:"SC5", bloc:"C", title:"Pentesting", c:"#ff3d7f",
+sections:[],
+notes:[],
+quiz:[]}
 ];
 
 /* =====================================================================
@@ -5844,7 +5850,7 @@ function renderHome(){
     <div class="hero">
       <div class="prompt"><span class="u">root@AIS</span>:<span class="p">~</span># ls ~/formation/ais <span class="caret"></span></div>
       <h1><span>sudo apt</span> upgrade</h1>
-      <p>Fiches de révision pour le titre Administrateur.trice d'infrastructures sécurisées, saison par saison, avec synthèses, flashcards et QCM corrigés.</p>
+      <p>Révisions pour le titre Administrateur.trice d'infrastructures sécurisées, saison par saison, avec fiches mémo, synthèses, flashcards et QCM corrigés.</p>
     </div>
     <div class="stats">
       <div class="stat"><b>${SEASONS.length}</b><span>Saisons</span></div>
@@ -5872,7 +5878,7 @@ function renderBlocs(){
         const sc = best[s.id];
         return `<button class="tile" style="--c:${s.c}" data-act="open" data-id="${s.id}">
           <span class="code-badge">${s.id}</span>
-          <span class="tile-t"><b>${esc(s.title)}</b><span>${s.syn.length ? `${acqList(s).length}/${s.syn.length} synthèses ✓` : `${notionCount(s)} notions`} · QCM ${sc ? sc.pct + " %" : "—"}</span></span>
+          <span class="tile-t"><b>${esc(s.title)}</b><span>${isEmpty(s) ? "Saison à venir · contenu bientôt disponible" : `${s.syn.length ? `${acqList(s).length}/${s.syn.length} synthèses ✓` : `${notionCount(s)} notions`} · QCM ${sc ? sc.pct + " %" : "—"}`}</span></span>
           ${ring(progress(s))}
         </button>`;
       }).join("")}</div>
@@ -5994,7 +6000,14 @@ function synHTML(s){
     ${next ? `<button class="btn pri" data-act="syn-open" data-i="${i+1}">${esc(next.id)} ${esc(next.t)} ›</button>` : `<button class="btn pri" data-act="tab" data-tab="quiz">QCM de la saison ›</button>`}
   </nav>`;
 }
+/* Saison encore sans contenu : panneau d'attente au lieu d'un onglet vide. */
+function isEmpty(s){ return !s.sections.length && !s.syn.length && !s.quiz.length; }
+function comingSoon(s, what, cmd){
+  return `<div class="panel syn-empty"><p class="mono" style="color:var(--c);font-size:12px">$ ${cmd}<br>// dossier vide</p>
+    <h3>${what} à venir</h3><p>Cette saison n'a pas encore de contenu. Elle se remplira au fil des épisodes : mémo, synthèses, flashcards et QCM.</p></div>`;
+}
 function cardsHTML(s){
+  if(!s.sections.length) return comingSoon(s, "Mémo", `cat ./memo/${s.id.toLowerCase()}`);
   return `<nav class="jump" aria-label="Sections">${s.sections.map((sec,i) => `<button data-act="jump" data-sec="${i}">${i+1} · ${esc(sec.t.split(/[:,(]/)[0].trim())}</button>`).join("")}${s.notes.length ? `<button data-act="jump" data-sec="beyond">Au-delà</button>` : ""}</nav>
   ${s.sections.map((sec,i) => `<details class="sec" id="sec-${i}"${i===0 ? " open" : ""}>
     <summary><span class="sec-n">${String(i+1).padStart(2,"0")}</span><span class="sec-t"><b>${esc(sec.t)}</b><small>${esc(sec.ref)}</small></span><span class="chev">›</span></summary>
@@ -6010,6 +6023,7 @@ function newFlash(s, only){
   state.flash = {deck, i:0, flipped:false, ok:[], ko:[]};
 }
 function flashHTML(s){
+  if(!flashDeck(s).length) return comingSoon(s, "Flashcards", `./flash --saison ${s.id.toLowerCase()}`);
   if(!state.flash) newFlash(s);
   const f = state.flash;
   if(f.i >= f.deck.length){
@@ -6105,6 +6119,7 @@ function startQuiz(s, subset){
 }
 function quizHTML(s){
   const z = state.quiz;
+  if(!s.quiz.length && !cardPairs(s).length) return comingSoon(s, "QCM", `./qcm --saison ${s.id.toLowerCase()}`);
   if(!z){
     const sc = best[s.id];
     return `<div class="panel">
