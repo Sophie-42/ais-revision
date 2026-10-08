@@ -133,8 +133,19 @@ mark{background:rgba(255,194,62,.25);color:inherit;border-radius:2px}
   box-shadow:0 0 14px -6px var(--c)}
 .top .back:hover,.top .back:active{background:color-mix(in srgb,var(--c) 28%,var(--surface));border-color:var(--c)}
 .top .back .ic{color:var(--c);font-size:15px;line-height:1}
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:12px 0 10px;padding:4px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
-.tab{background:none;border:0;border-radius:9px;padding:10px 0;font-family:var(--f-mono);font-size:13px;font-weight:600;color:#c3cbea;letter-spacing:.02em;transition:background .15s,color .15s}
+.tabs{display:grid;grid-template-columns:repeat(5,auto);gap:4px;margin:12px 0 10px;padding:4px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.tab{background:none;border:0;border-radius:9px;padding:10px 4px;font-family:var(--f-mono);font-size:12.5px;font-weight:600;color:#c3cbea;letter-spacing:0;white-space:nowrap;transition:background .15s,color .15s}
+/* ECF */
+.ecf-q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:10px}
+.ecf-q .n{font-family:var(--f-mono);font-size:11px;color:var(--c);letter-spacing:.06em}
+.ecf-q .qq{margin:0;font-weight:600;font-size:15px;line-height:1.45}
+.ecf-q .multi{font-family:var(--f-mono);font-size:11px;color:var(--warn)}
+.ecf-q.todo{border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
+.ecf-list{display:grid;gap:12px;margin-top:14px}
+.ecf-bar{position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);margin-top:16px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:rgba(15,21,40,.94);border:1px solid var(--line);backdrop-filter:blur(8px)}
+.ecf-bar span{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.opt.chk .l{border-radius:4px}
+@media (max-width:370px){.tab{font-size:11.5px;padding:10px 2px}}
 .tab:hover{background:var(--surface-2);color:var(--fg)}
 .tab[aria-selected="true"]{background:var(--c);color:#06101a;box-shadow:0 0 16px -6px var(--c)}
 .glow{height:120px;margin-bottom:-120px;background:radial-gradient(60% 100% at 50% 0,color-mix(in srgb,var(--c) 16%,transparent),transparent);pointer-events:none}
@@ -1524,12 +1535,45 @@ sections:[
    ["except X:","Toujours une exception précise"],
    ["argparse","Arguments + --help gratuit"],
    ["venv · requirements.txt","Isoler et figer les dépendances"]]}
+ ]},
+ {t:"Infrastructure as Code : Terraform & Ansible", ref:"fiches 05.5, 05.7", g:[
+  {h:"Pourquoi l'IaC", kv:[
+   ["IaC","L'infra devient un fichier texte : on décrit un résultat, pas des clics"],
+   ["Snowflake server","Serveur unique monté à la main, impossible à reproduire à l'identique"],
+   ["Impératif","On écrit la suite d'actions (Bash, PowerShell) : l'idempotence est à coder"],
+   ["Déclaratif","On décrit l'état voulu (Terraform, Ansible) : l'outil garantit l'idempotence"],
+   ["Convergence","L'outil compare état voulu et état réel, et n'applique que l'écart"],
+   ["Dérive","Modif faite à la souris : terraform plan la signale (~ memory = 4096 -> 2048)"]]},
+  {h:"Terraform", kv:[
+   ["Rôle","Crée la machine en parlant à l'API de l'hyperviseur (langage HCL)"],
+   ["Provider","Connecteur vers une plateforme (bpg/proxmox, AWS, Azure…)"],
+   ["Ressource","Un objet géré (ex. un conteneur LXC)"],
+   ["tfstate","Fichier d'état JSON : le carnet d'adresses de Terraform, jamais commité"],
+   ["terraform init","Télécharge le provider, fige .terraform.lock.hcl (qui se commite)"],
+   ["terraform validate","Vérifie la syntaxe sans contacter la plateforme"],
+   ["terraform plan","Annonce les changements : à lire avant tout apply"],
+   ["terraform apply","Applique (confirmation yes) · destroy supprime"],
+   ["-/+ dans un plan","Destruction puis recréation, système de fichiers compris"],
+   ["Secrets","Jeton d'API, *.tfstate, *.tfvars, clés privées : dans le .gitignore"]]},
+  {h:"Ansible", kv:[
+   ["Rôle","Configure la machine qui existe, en SSH (langage YAML)"],
+   ["Sans agent","Rien à installer sur la cible : SSH + Python suffisent"],
+   ["Inventaire","inventaire.ini : groupes de machines ([web]), c'est le groupe qu'on cible"],
+   ["Playbook","Fichier YAML de tâches exécutées de haut en bas"],
+   ["Module","ansible.builtin.apt / copy / service : nom complet pour vérifier qu'il existe"],
+   ["ansible -m ping","Teste SSH, authentification et Python (pas un ping ICMP)"],
+   ["changed","Ce qui a bougé : 0 au 2e passage si le playbook est idempotent"],
+   ["become: true","Passer admin quand on se connecte avec un compte ordinaire"],
+   ["--check","Simulation, sans rien modifier"],
+   ["Juge de paix","destroy → apply → playbook : tout doit revenir à l'identique"]]}
  ]}
 ],
 notes:[
  "Contre le piège rm -rf $VAR/* avec une variable vide, Bash offre \"${VAR:?}\" : le script s'arrête si VAR est vide (c'est ce que suggère shellcheck SC2115).",
  "Le verrou de la fiche 03.5 (test puis touch) laisse une fenêtre où deux exécutions passent ; flock pose le verrou de façon atomique (flock -n /var/lock/backup.lock script.sh).",
- "La fiche 01.2 annonce l'IaC en « SB4-02 », mais SB4-02 est la fiche Python : vérifie la numérotation avec ton formateur."
+ "La fiche 01.2 annonce l'IaC en « SB4-02 », mais SB4-02 est la fiche Python : l'IaC est traitée dans les fiches 05.5 (Terraform) et 05.7 (Ansible).",
+ "Ansible : host_key_checking = False et insecure = true (Terraform) sont des conforts de lab. En production, on vérifie les clés SSH des hôtes et les certificats : sinon une attaque de l'homme du milieu passe inaperçue.",
+ "Terraform : sensitive = true masque une variable à l'affichage, mais sa valeur reste en clair dans le tfstate. D'où la règle : ne jamais commiter le tfstate, et en équipe le stocker dans un backend distant chiffré."
 ],
 quiz:[
  {q:"Que signifie la ligne cron 30 2 * * * ?", o:["Tous les jours à 2 h 30","Le 30 février à 2 h","Toutes les 30 minutes pendant 2 heures","Le 2 de chaque mois à 0 h 30"], e:"Ordre des champs : minute (30), heure (2), jour du mois, mois, jour de la semaine. Les * = tous."},
@@ -1544,7 +1588,14 @@ quiz:[
  {q:"Quel est le piège n°1 d'un script lancé par cron ?", o:["L'environnement minimal : PATH réduit, il faut des chemins absolus","Cron ne lance que des scripts Python","Cron ignore le shebang","Cron s'exécute toujours en root"], e:"Le script marche en console mais pas en cron : PATH minimal, pas de variables de session. Chemins absolus et logs datés évitent ce piège."},
  {q:"Pourquoi toujours passer un timeout à requests.get ?", o:["Sans timeout, le script peut attendre indéfiniment","Pour chiffrer la requête","Pour activer raise_for_status","Pour lire le JSON automatiquement"], e:"Par défaut requests n'a pas de timeout : un serveur qui ne répond pas bloque le script pour toujours (et une tâche cron reste pendue)."},
  {q:"Quand utiliser git commit --amend ?", o:["Pour corriger le dernier commit, avant de l'avoir poussé","Pour annuler un commit déjà poussé","Pour fusionner deux branches","Pour supprimer un secret de tout l'historique"], e:"--amend réécrit le dernier commit : après un push, il faudrait forcer et ça casse le travail des collègues. Un secret poussé se révoque d'abord."},
- {q:"Quelle syntaxe arrête le script si VAR est vide, pour sécuriser un rm -rf ?", o:["\"${VAR:?}\"","\"${VAR:-}\"","'$VAR'","$(VAR)"], e:"${VAR:?} lève une erreur si la variable est vide ou absente : rm -rf \"${VAR:?}\"/* ne peut plus devenir rm -rf /*. ${VAR:-def} donne une valeur par défaut."}
+ {q:"Quelle syntaxe arrête le script si VAR est vide, pour sécuriser un rm -rf ?", o:["\"${VAR:?}\"","\"${VAR:-}\"","'$VAR'","$(VAR)"], e:"${VAR:?} lève une erreur si la variable est vide ou absente : rm -rf \"${VAR:?}\"/* ne peut plus devenir rm -rf /*. ${VAR:-def} donne une valeur par défaut."},
+ {q:"Quelle différence entre une approche impérative et déclarative ?", o:["Impératif : on écrit les étapes · déclaratif : on décrit l'état voulu","Impératif : on décrit l'état voulu · déclaratif : on écrit les étapes","Le déclaratif est réservé à Windows","Aucune, ce sont des synonymes"], e:"Un script Bash dit comment faire (if/else, mkdir…). Terraform et Ansible décrivent le résultat attendu, et l'outil n'applique que l'écart : l'idempotence est garantie par l'outil."},
+ {q:"Terraform ou Ansible : lequel crée la machine virtuelle ?", o:["Terraform, via l'API de l'hyperviseur","Ansible, via SSH","Les deux, indifféremment","Aucun, il faut le faire à la souris"], e:"Terraform « livre la maison vide » : il crée la machine (HCL, API). Ansible « installe la cuisine » : il configure la machine existante en SSH (YAML)."},
+ {q:"Pourquoi ne jamais commiter le fichier .tfstate ?", o:["Il contient des valeurs sensibles en clair","Il est trop volumineux pour Git","Terraform le recrée à chaque plan","Il est spécifique à Windows"], e:"Le tfstate est le carnet d'adresses de Terraform, valeurs sensibles comprises (même avec sensitive = true). Le .terraform.lock.hcl, lui, se commite."},
+ {q:"Dans un terraform plan, que signifie le symbole -/+ ?", o:["Destruction puis recréation de la ressource, données comprises","Modification sur place","Création d'une nouvelle ressource","Suppression simple"], e:"+ crée, ~ modifie sur place, - supprime, -/+ détruit puis recrée, système de fichiers compris. D'où le réflexe : toujours lire le plan avant apply."},
+ {q:"Que faut-il installer sur une machine gérée par Ansible ?", o:["Rien de spécial : SSH et Python suffisent","Un agent Ansible","Terraform","Un serveur web"], e:"Ansible est sans agent : il se connecte en SSH, pousse du code Python temporaire, l'exécute puis nettoie."},
+ {q:"Que teste la commande ansible all -m ansible.builtin.ping ?", o:["La connexion SSH, l'authentification et Python sur la cible","Un ping ICMP classique","Le temps de réponse du serveur web","La syntaxe du playbook"], e:"Ce « ping » exécute un vrai module : s'il répond SUCCESS / pong, Ansible peut travailler sur la machine. La syntaxe se vérifie plutôt avec --check ou --syntax-check."},
+ {q:"Au 2e lancement d'un playbook idempotent, que doit afficher changed ?", o:["0","Le même nombre qu'au 1er lancement","Le nombre de tâches","Une erreur"], e:"Ansible constate que chaque état est déjà atteint et ne fait rien. Un changed qui revient à chaque passage trahit souvent un command, un shell ou un state: latest."}
 ]},
 
 /* ------------------------------------------------------------------ SC1 */
@@ -4115,7 +4166,7 @@ SB4:[
   {h:"Le deal : script → IA → IaC", g:[
    {p:"L'IA générative (ChatGPT, Claude, Copilot…) fait partie du poste d'un admin sys en 2026. Ce n'est ni magique, ni interdit : c'est un outil. La vraie question n'est pas « est-ce que je peux l'utiliser ? » mais **« est-ce que je peux juger le résultat ? »**"},
    {p:"Fil rouge du module : scripting (SB4-01) → IA & scripting (ici) → Infrastructure as Code (SB4-02). L'IA accélère le passage à l'IaC."},
-   {p:"Correction : la fiche annonce l'IaC en « SB4-02 », mais SB4-02 est la fiche Python : vérifie la numérotation avec ton formateur."}]},
+   {p:"Correction : la fiche annonce l'IaC en « SB4-02 », mais SB4-02 est la fiche Python. L'IaC est traitée dans les fiches 05.5 (Terraform) et 05.7 (Ansible)."}]},
   {h:"Ce que l'IA fait très bien / très mal", g:[
    {cols:[
     ["Ce qu'elle fait bien","","Boilerplate (shebang, gestion d'args, logs) · rappel de syntaxe exacte (options, flags) · traduction d'un langage à l'autre (Bash → PowerShell) · explication de code existant · doc, données de test, refactoring."],
@@ -4460,6 +4511,72 @@ SB4:[
     ["Traiter en priorité ce qui est dangereux","Un mot de passe en clair, un del /s /q sur une variable non testée, un script planifié en SYSTEM sans log"]]},
    {p:"Le mot de passe en clair dans un script de connexion distribué par GPO est un grand classique d'audit : le partage **NETLOGON** est lisible par tous les utilisateurs du domaine."},
    {p:"La suite : Batch décrit une suite de commandes, PowerShell manipule des objets. Vous savez désormais lire un .bat ; place à PowerShell."}]}
+ ]}
+,{id:"05.5", t:"IaC : Terraform", sub:"Impératif vs déclaratif, provider/ressource/état, cycle de vie, lecture d'un plan", parts:[
+  {h:"Pourquoi l'Infrastructure as Code", g:[
+   {def:"Depuis le début de la saison, vous décrivez des **étapes** (scripts, playbooks). Avec l'IaC, vous décrivez un **résultat**. L'infra devient un fichier texte : fini la souris."},
+   {p:"Les deux problèmes du « à la souris » : **la VM qu'on ne sait pas refaire** (montée en 3 h en 2023, personne ne sait la reproduire → le jour du crash, c'est une enquête) et **les serveurs jumeaux** (srv-web-01/-02 installés par deux personnes, un paquet oublié, le bug ne se reproduit que sur l'un). On les appelle des **snowflake servers** : tous uniques, aucun reproductible."}]},
+  {h:"Impératif vs déclaratif", g:[
+   {code:"# Impératif (Bash) : vous portez la décision\nif [[ -d \"$DOSSIER\" ]]; then\n    echo \"Le dossier existe déjà\"\nelse\n    mkdir -p \"$DOSSIER\"\nfi\n\n# Déclaratif (Ansible) : vous décrivez l'état voulu\n- name: Le dossier de sauvegarde existe\n  ansible.builtin.file:\n    path: /sauvegardes/quotidien\n    state: directory\n    mode: '0750'"},
+   {table:{head:["","Impératif","Déclaratif"], rows:[
+    ["Vous écrivez","La suite d'actions","L'état voulu"],
+    ["La question","Comment ?","Quoi ?"],
+    ["Relancer","Peut casser","Ne change rien"],
+    ["Idempotence","Vous la codez","L'outil la garantit"],
+    ["Outils","Bash, PowerShell","Terraform, Ansible"]]}},
+   {p:"**Convergence** : l'outil lit l'état voulu (votre fichier), l'état réel (ce que Proxmox répond), et n'applique que l'écart. **Dérive de configuration** : un collègue passe une VM de 2 à 4 Go à la souris sans prévenir → terraform plan le signale (~ memory = 4096 -> 2048). Terraform ne tranche pas qui a raison : erreur → on applique · changement légitime → on corrige le fichier."},
+   {p:"Un fichier IaC bourré de conditions est de l'impératif déguisé. Dès qu'on appelle une commande brute (command, shell), l'idempotence redevient votre problème. Une infra décrite par du code ne se modifie plus à la souris."}]},
+  {h:"Terraform : les 3 concepts & le jeton", g:[
+   {kv:[
+    ["Provider","Connecteur vers une plateforme (Proxmox, AWS, Azure…)"],
+    ["Ressource","Un objet géré (ici un conteneur LXC)"],
+    ["État (tfstate)","Fichier JSON où Terraform note ce qu'il a créé : son carnet d'adresses"]]},
+   {p:"Terraform s'installe sur votre poste. C'est un **client qui parle à une API** : le Proxmox n'a rien à installer."},
+   {code:"# Jeton d'API Proxmox : format à 3 morceaux + secret\nuser1@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\n# Créé dans Datacenter > Permissions > Jetons d'API. Secret affiché UNE SEULE FOIS."},
+   {def:"**Ne commitez JAMAIS** : le jeton d'API · le fichier .tfstate (valeurs sensibles en clair) · les clés privées SSH. Un secret poussé reste dans l'historique même après git rm. Seul geste correct en cas de fuite : **révoquer le jeton**."},
+   {code:"# .gitignore\n.terraform/\n*.tfstate\n*.tfvars\n!*.tfvars.exemple        # le modèle, lui, se commite\n\n# provider + variable sensitive\nterraform {\n  required_providers {\n    proxmox = { source = \"bpg/proxmox\", version = \"~> 0.111\" }\n  }\n}\nprovider \"proxmox\" {\n  endpoint  = var.pve_endpoint\n  api_token = var.pve_api_token\n  insecure  = true           # cert auto-signé en lab : JAMAIS en prod\n}\nvariable \"pve_api_token\" {\n  type      = string\n  sensitive = true           # masque à l'affichage, PAS dans le tfstate\n}"},
+   {p:"Attention : deux providers Proxmox existent : **bpg/proxmox** (moderne) et **Telmate/proxmox** (syntaxe incompatible). Ne pas mélanger."}]},
+  {h:"Un conteneur LXC en Terraform", g:[
+   {code:"# main.tf\nresource \"proxmox_virtual_environment_container\" \"web\" {\n  node_name    = var.pve_node\n  vm_id        = var.vm_id\n  pool_id      = var.pool       # jeton a droits uniquement sur ce pool\n  unprivileged = true           # root du conteneur ≠ root de l'hôte\n  features { nesting = true }   # nécessaire pour systemd Debian 13\n  initialization {\n    hostname = \"srv-web-01\"\n    ip_config {\n      ipv4 {\n        address = \"${var.adresse_ip}/16\"\n        gateway = var.passerelle\n      }\n    }\n    user_account { keys = [file(\"~/.ssh/id_ed25519.pub\")] }\n  }\n  operating_system {\n    template_file_id = \"local:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst\"\n  }\n}"},
+   {p:"Clé publique : se copie sans crainte. Clé privée : reste sur votre poste."}]},
+  {h:"Cycle de vie & lecture d'un plan", g:[
+   {code:"terraform init       # télécharge le provider dans .terraform/, fige .terraform.lock.hcl (SE COMMITE)\nterraform fmt        # réindente\nterraform validate   # syntaxe, sans contacter Proxmox : le shellcheck de Terraform\nterraform plan       # compare code / état / réalité, annonce\nterraform apply      # exécute (confirmation yes)\nterraform destroy    # supprime\nterraform state list # carnet d'adresses"},
+   {kv:[["+","Création"],["~","Modification sans recréer"],["-","Suppression"],["-/+","Destruction puis recréation : système de fichiers compris !"]]},
+   {def:"**Le geste pro** : lire la dernière ligne du plan (Plan: 1 to add, 0 to change, 0 to destroy), puis les ressources concernées. Jamais d'apply sans avoir lu son plan. -auto-approve saute la confirmation : c'est une protection, pas une gêne."},
+   {p:"Terraform s'arrête à la porte : la machine existe, elle est joignable, elle est vide. Ce qui se passe à l'intérieur, c'est le métier d'Ansible (fiche 05.7)."}]}
+ ]},
+ {id:"05.7", t:"Ansible", sub:"Sans agent par SSH, inventaire, playbook YAML, idempotence et changed", parts:[
+  {h:"Terraform s'arrête à la porte, Ansible entre", g:[
+   {p:"Terraform a créé srv-web-01 depuis un modèle, avec son adresse et votre clé SSH. Personne n'a cliqué, c'est reproductible. Reste à installer et configurer ce qui tourne dedans. Même philosophie déclarative, autre outil."},
+   {table:{head:["Terraform","Ansible"], rows:[
+    ["Crée la machine","Configure la machine qui existe"],
+    ["Parle à l'API de l'hyperviseur","Parle au système, en SSH"],
+    ["Langage HCL","Langage YAML"],
+    ["Tient un fichier d'état","Interroge la machine à chaque passage"]]}},
+   {p:"Terraform livre une maison vide. Ansible y installe la cuisine."}]},
+  {h:"Sans agent, par SSH", g:[
+   {def:"**Rien à installer sur la machine gérée.** Ansible s'y connecte en SSH, pousse du code Python temporaire, l'exécute, nettoie."},
+   {p:"Côté conteneur il faut : SSH, un compte avec votre clé publique, Python. Le bloc initialization de Terraform a déposé la clé, le modèle Debian fournit le reste."}]},
+  {h:"Inventaire & config", g:[
+   {code:"# inventaire.ini\n[web]\nsrv-web-01 ansible_host=10.0.0.11\n[web:vars]\nansible_user=root\n\n# ansible.cfg\n[defaults]\ninventory         = ./inventaire.ini\nprivate_key_file  = ~/.ssh/id_ed25519\nhost_key_checking = False    # confort de lab, FAUTE en production"},
+   {p:"Le groupe **[web]** est l'unité de ciblage. Le playbook vise le groupe, jamais la machine. L'adresse 10.0.0.11 vient de votre main.tf Terraform : c'est la jointure entre les deux outils."},
+   {h:"Avant tout playbook : on vérifie", code:"ansible all -i inventaire.ini -m ansible.builtin.ping\nsrv-web-01 | SUCCESS => { \"changed\": false, \"ping\": \"pong\" }"},
+   {p:"Ce ping n'est PAS un ICMP : il teste SSH, l'authentification, Python et l'exécution d'un module. Tant qu'il ne répond pas SUCCESS, écrire un playbook est une perte de temps."},
+   {p:"**Piège WSL, « world writable directory »** : Ansible refuse de lire un ansible.cfg que n'importe qui pourrait modifier (dossier Windows monté sous WSL). Il continue en silence, sans votre config → config file = None, clé SSH et inventaire ignorés. Parade : export ANSIBLE_CONFIG=$PWD/ansible.cfg ou chmod 755 ."}]},
+  {h:"Le playbook : trois modules, trois états", g:[
+   {code:"# site.yml\n- name: Configuration du serveur web\n  hosts: web\n  tasks:\n    - name: Le paquet nginx est installé\n      ansible.builtin.apt:\n        name: nginx\n        state: present\n        update_cache: true\n    - name: La page d'accueil est en place\n      ansible.builtin.copy:\n        content: \"<h1>Serveur de {{ ansible_hostname }}</h1>\\n\"\n        dest: /var/www/html/index.html\n        mode: '0644'\n    - name: nginx est démarré et activé au boot\n      ansible.builtin.service:\n        name: nginx\n        state: started\n        enabled: true"},
+   {p:"**Indentation YAML** : espaces uniquement, 2 par niveau. Une tabulation → fichier refusé."},
+   {p:"Pas de **become: true** ici : on est déjà root dans le conteneur. Sur un serveur où on arrive avec un compte ordinaire, il faut l'ajouter pour passer admin. Nom complet **ansible.builtin.*** : pas du zèle, c'est avec lui qu'on vérifie qu'un module existe vraiment. Les tâches s'exécutent de haut en bas, cet ordre est votre responsabilité."}]},
+  {h:"L'idempotence en action : le changed", g:[
+   {code:"# 1re exécution : la machine est vierge\nansible-playbook -i inventaire.ini site.yml\nPLAY RECAP ************\nsrv-web-01 : ok=4 changed=3 unreachable=0 failed=0\n\n# 2e exécution : immédiatement après\nansible-playbook -i inventaire.ini site.yml\nPLAY RECAP ************\nsrv-web-01 : ok=4 changed=0 unreachable=0 failed=0"},
+   {def:"Ansible a vérifié chaque état, constaté qu'il était atteint, et n'a rien fait. Le **changed** est votre instrument de mesure : il dit exactement ce qui a bougé sur le parc, et rien d'autre."},
+   {p:"Un playbook qui affiche changed sur les mêmes tâches à chaque passage a un problème. Presque toujours un command, un shell, ou un state: latest."}]},
+  {h:"IA & IaC : le juge de paix", g:[
+   {p:"HCL et YAML sont très réguliers → les LLMs les écrivent avec aisance. Et c'est exactement ce qui rend leurs erreurs difficiles à voir. Sur la forme l'IA est excellente : tout se joue sur les **noms exacts** des ressources et modules."},
+   {code:"# Hallucinations fréquentes\nresource \"proxmox_vm_qemu\" \"web\" { ... }   # ← Telmate, PAS bpg !\n- ansible.builtin.apt_package:              # ← n'existe pas (c'est apt)\n    name: nginx"},
+   {p:"La doc fait foi : le registre Terraform pour un provider, docs.ansible.com pour un module. Le nom complet est la clé de recherche. Garde-fous : **terraform validate** · **ansible-playbook … --check**."},
+   {h:"Le juge de paix de l'IaC", code:"# Tout doit revenir à l'identique, sans une seule action à la souris\nterraform destroy\nterraform apply\nansible-playbook -i inventaire.ini site.yml"},
+   {def:"« Une infrastructure qu'on sait détruire est une infrastructure qu'on a vraiment comprise. »"}]}
  ]}
 /*@SB4*/
 ],
@@ -5784,6 +5901,42 @@ SC4:[
 SEASONS.sort((x,y) => x.id.localeCompare(y.id));
 const epNum = id => parseFloat(String(id).replace(/^E/, ""));
 SEASONS.forEach(s => { s.syn = (SYN[s.id] || []).slice().sort((a,b) => epNum(a.id) - epNum(b.id)); });
+/* ---------- ECF de fin de saison (corrigés des formulaires O'clock) ---------- */
+const ECF = {
+SA1: {title:"ECF SA01 : Savoirs de base", intro:"30 questions, 1 point chacune. Réponds sans documents, comme le jour du Titre Pro (pas d'accès à Internet pendant le questionnaire). Une question à réponses multiples ne rapporte le point que si toutes les bonnes cases sont cochées, et elles seules.", qs:[
+{q:"Comment s'appelle le procédé qui permet de stocker du texte en binaire ?", o:["L'encodage","Le chiffrage","Le cryptage","Le chiffrement"], a:[0], e:"L'encodage (ASCII, UTF-8…) fait correspondre chaque caractère à un nombre binaire, sans aucun secret. Le chiffrement sert à rendre une donnée illisible sans la clé. « Chiffrage » désigne une estimation de coût et « cryptage » n'est pas le terme correct en français."},
+{q:"À quoi sert le CPU ?", o:["Stocker des données","Connecter des composants entre eux","Afficher des images","Faire des calculs"], a:[3], e:"Le CPU (processeur) exécute les instructions, donc les calculs. Le stockage revient à la RAM et aux disques, la connexion des composants à la carte mère, l'affichage au GPU."},
+{q:"La virtualisation, c'est :", o:["Un algorithme de chiffrement des données","Un système de stockage cloud","Un protocole réseau","Une technique permettant de créer des machines virtuelles"], a:[3], e:"Un hyperviseur (type 1 comme ESXi ou Proxmox, type 2 comme VirtualBox) partage les ressources physiques entre plusieurs machines virtuelles isolées."},
+{q:"Lesquelles de ces propositions sont toutes des IHM ?", o:["Code morse, MD5, SHA-256","Ligne de commande, interface graphique, téléscripteur","Adresse IP, masque de sous-réseau, adresse de broadcast","Chiffrement symétrique, asymétrique & hybride"], a:[1], e:"IHM = Interface Homme-Machine : le moyen par lequel une personne dialogue avec la machine (CLI, GUI, téléscripteur). MD5 et SHA-256 sont des fonctions de hachage, IP/masque/broadcast relèvent de l'adressage réseau."},
+{q:"Quel composant transforme le courant alternatif en courant continu ?", o:["Alimentation","Carte-mère","Processeur","Convertisseur","Polarisateur","Bio-compensateur géodésique"], a:[0], e:"Le bloc d'alimentation (PSU) convertit le courant alternatif du secteur (230 V) en courant continu basse tension (12 V, 5 V, 3,3 V) pour les composants."},
+{q:"Combien de chiffres différents comporte le système hexadécimal ?", o:["2","8","10","16","256"], a:[3], e:"Hexadécimal = base 16 : 0 à 9 puis A à F. Un chiffre hexa représente 4 bits, donc un octet s'écrit avec 2 chiffres hexa (00 à FF)."},
+{q:"Lequel de ces masques de sous-réseau est incorrect ?", o:["255.255.255.0","255.128.0.0","255.255.252.0","255.0.0.0","255.12.0.0"], a:[4], e:"Un masque est une suite continue de 1 suivie de 0. Les octets valides sont 0, 128, 192, 224, 240, 248, 252, 254 et 255. 12 = 00001100 : des 1 isolés après des 0, donc impossible."},
+{q:"Lequel de ces systèmes est basé sur le noyau Linux ?", o:["Windows","Debian","MacOS"], a:[1], e:"Debian est une distribution GNU/Linux. Windows repose sur le noyau NT, macOS sur XNU (famille BSD/Unix)."},
+{q:"Quelle est la topologie d'Internet ?", o:["Maillé !","En bus !","En anneau !","En étoile !","Aucune des propostions, ou un mélange de ces propostions."], a:[4], e:"Piège classique : le cœur d'Internet est très maillé, mais Internet dans son ensemble est un réseau de réseaux qui mélange toutes les topologies (étoile pour les réseaux locaux, maillage entre opérateurs…). La bonne réponse est donc « un mélange ». Le mémo dit « maillée (Internet) » : retiens plutôt « surtout maillé, mais hybride »."},
+{q:"Quel type de chiffrement est un compromis entre sécurité et vitesse ?", o:["Chiffrement hybride","Chiffrement symétrique","Chiffrement asymétrique","Aucune des propositions ci-dessus"], a:[0], e:"L'hybride utilise l'asymétrique (sûr pour échanger une clé, mais lent) pour transmettre une clé de session, puis le symétrique (rapide) pour chiffrer les données. C'est le principe de TLS/HTTPS."},
+{q:"Le BIOS, c'est quoi ?", o:["Ça permet de dessiner des diagrammes réseau !","Ça permet d'empêcher les clés USB vérolées","Ça pilote le démarrage de l'ordinateur, gère/initialise les périphériques","Ça pilote les échanges sur un réseau local"], a:[2], e:"Le BIOS (aujourd'hui l'UEFI) est le firmware de la carte mère : il teste le matériel (POST), initialise les périphériques puis lance le chargeur de démarrage du système."},
+{q:"Combien de chiffres différents comporte le système octal ?", o:["2","8","10","16","256"], a:[1], e:"Octal = base 8 : chiffres 0 à 7. Un chiffre octal représente 3 bits (on le retrouve dans les droits Linux, par exemple chmod 755)."},
+{q:"Quels sont les critères de sécurité ?", o:["Disponibilité, Intégrité, Confidentialité, Preuve, Authentification","Disponibilité, Identité, Confidentialité, Preuve, Acceptation","Diagnostic, Intégrité, Confidentialité, Preuve, Authentification","Disponibilité, Identité, Traçabilité, Preuve, Acceptation"], a:[0], e:"DICP + A : Disponibilité, Intégrité, Confidentialité, Preuve (traçabilité, non-répudiation) et Authentification. Les autres listes glissent des intrus (Identité, Diagnostic, Acceptation)."},
+{q:"Qu'est-ce qu'un firmware ?", o:["Un logiciel qui nous permet de créer des machines virtuelles","Un logiciel embarqué sur un circuit électronique","Un logiciel qui gère des réglages","Un logiciel qui permet de créer d'autres logiciels"], a:[1], e:"Le firmware (micrologiciel) est stocké dans une mémoire du composant lui-même : BIOS/UEFI, firmware d'un routeur, d'un SSD, d'une imprimante… Créer des VM, c'est le rôle d'un hyperviseur."},
+{q:"Sur quelle architecture reposent les ordinateurs modernes ?", o:["L'architecture MVC","L'architecture Gothique","L'architecture de Von Neumann","L'architecture d'Alan Turing"], a:[2], e:"Von Neumann (1945) : une unité de calcul, une unité de contrôle, une mémoire unique qui contient à la fois les programmes et les données, et des entrées/sorties. Turing a posé le modèle théorique (machine de Turing), pas l'architecture matérielle. MVC est un patron de conception logicielle."},
+{q:"Combien y a-t-il d'adresses IPv4 ?", o:["Moins de 500 000","Moins de 5 millions","Moins de 5 milliards"], a:[2], e:"Une IPv4 tient sur 32 bits : 2³² ≈ 4,29 milliards d'adresses. C'est leur épuisement qui a mené au NAT puis à IPv6 (128 bits)."},
+{q:"Pour écrire à la fois en français et en japonais, on utilise…", o:["... Unicode !","... ASCII !","... PDP-8 !"], a:[0], e:"Unicode (le plus souvent encodé en UTF-8) couvre tous les systèmes d'écriture. ASCII ne code que 128 caractères (sans accents ni kanji). Le PDP-8 est un ancien mini-ordinateur."},
+{q:"Quelle proposition est juste ?", o:["2 byte = 8 bits","1 octet = 8 bytes","1 byte = 8 octets","8 bytes = 8 bits","1 byte = 1 octet"], a:[4], e:"Byte est le mot anglais pour octet : 1 byte = 1 octet = 8 bits. Attention à la casse : Mb (mégabit) ≠ MB (mégaoctet)."},
+{q:"Linux, c'est…", o:["... une distribution","... un système d'exploitation","... un hyperviseur","... un noyau","... une architecture"], a:[3], e:"Au sens strict, Linux est uniquement le noyau (kernel), créé par Linus Torvalds en 1991. Le système complet (noyau + outils GNU + logiciels) forme une distribution : Debian, Ubuntu, Red Hat…"},
+{q:"Quel composant est facultatif dans un ordinateur ?", o:["Carte-mère","Carte graphique","Processeur","Disque dur","Mémoire vive","Alimentation"], a:[1], e:"Une carte graphique dédiée n'est pas indispensable : de nombreux processeurs ont une puce graphique intégrée (iGPU), et un serveur peut tourner sans écran. Sans carte mère, CPU, RAM, alimentation ou stockage, la machine ne démarre pas de système."},
+{q:"Entre un processeur et une carte mère, il faut vérifier…", o:["De la capacité à faire de la virtualisation !","Du BIOS installé !","Du nombre de broches PCA disponibles","De la compatibilité du socket !"], a:[3], e:"Le socket est le support physique du processeur (AM5, LGA1700…) : processeur et carte mère doivent utiliser le même. Le chipset et la version du BIOS comptent aussi, mais le critère de base est le socket."},
+{q:"Quelle est la différence entre le chiffrement symétrique et asymétrique ?", o:["Le nombre de clés utilisées","La sécurité","Le nombre d'opérations par seconde","La complexité de la clé"], a:[0], e:"Symétrique : une seule clé partagée sert à chiffrer et à déchiffrer (AES). Asymétrique : une paire de clés, publique et privée (RSA, ECC). La vitesse et la longueur des clés en découlent, mais la différence de définition est le nombre de clés."},
+{q:"Un système qui fonctionne H24, 7J/7, à 100 % répond à un critère…", o:["... de confidentialité","... d'authenticité","... de disponibilité","... de sécurité","... d'accessibilité"], a:[2], e:"La disponibilité (le D de DICP) : le service est accessible quand on en a besoin. Elle se mesure en pourcentage (SLA de 99,9 % par exemple). « Accessibilité » est un piège : ce n'est pas un critère DICP."},
+{q:"Quelle est la meilleure pratique contre les malwares ?", o:["Installer un bon anti-virus payant","S'assurer que son adresse n'a pas fuité sur haveibeenpwnd.com","Monter son propre ordinateur plutôt que d'en acheter un pré-monté","Télécharger ses logiciels depuis des sources fiables","Abandonner définitivement les clés USB"], a:[3], e:"La prévention la plus efficace est de ne pas faire entrer le malware : sites officiels, dépôts de paquets signés. Un antivirus aide mais ne suffit pas, et Have I Been Pwned concerne les fuites d'identifiants, pas les malwares."},
+{q:"Quelle adresse IP est incorrecte ?", o:["192.168.7.10","10.172.16.5","172.192.168.1","2.3.4.5","292.168.1.1","10.0.1.1"], a:[4], e:"Chaque octet d'une IPv4 va de 0 à 255. 292 dépasse 255, donc l'adresse est invalide. Les autres sont valides, même si certaines semblent inhabituelles (172.192.x.x est publique, 10.172.16.5 est privée)."},
+{q:"Un mot de passe solide contient…", o:["des caractères spéciaux","des lettres en majuscule","des lettres en minuscule","des chiffres","au moins 8, 10, ou encore plus de caractères"], a:[0,1,2,3,4], e:"Toutes les réponses sont justes : la force d'un mot de passe vient de la taille de l'alphabet utilisé (majuscules, minuscules, chiffres, spéciaux) et surtout de sa longueur. L'ANSSI recommande au moins 12 caractères, ou une phrase de passe."},
+{q:"Quelle est la menace n°1 ?", o:["L'attaque \"Man-in-the-middle\"","Les hackers chinois/russes","L'utilisateur","Les clés USB"], a:[2], e:"L'utilisateur (clic sur un lien de phishing, mot de passe faible, clé USB inconnue branchée…) est à l'origine de la majorité des incidents. D'où l'importance de la sensibilisation."},
+{q:"Quelle est l'unité de capacité de stockage ?", o:["Hertz","Watt","Byte","Ampère","Volt"], a:[2], e:"Le byte (octet) et ses multiples (Ko, Mo, Go, To). Le hertz mesure une fréquence (horloge du CPU), le watt une puissance, l'ampère une intensité, le volt une tension."},
+{q:"Il faut se méfier…", o:["... des utilisateurs","... des clés USB","... des sites web douteux","... des trucs trop beaux pour être vrai","... des pièces jointes non-sollicitées dans des mails","... des liens web dans des mails"], a:[0,1,2,3,4,5], e:"Tout est à cocher : en sécurité, on part du principe « ne jamais faire confiance, toujours vérifier » (zero trust). Chaque proposition est un vecteur d'attaque courant : ingénierie sociale, BadUSB, phishing, pièces jointes piégées."},
+{q:"Quelle est la topologie d'un réseau local ou domestique ?", o:["Maillé !","En bus !","En anneau !","En étoile !","Aucune des propostions, ou un mélange de ces propostions."], a:[3], e:"Tous les appareils sont reliés à un point central (box, switch) : c'est une topologie en étoile. Le bus (Ethernet coaxial) et l'anneau (Token Ring) ont disparu des réseaux locaux."}
+]}
+};
+SEASONS.forEach(s => { s.ecf = ECF[s.id] || null; });
 const $app = document.getElementById("app");
 const byId = Object.fromEntries(SEASONS.map(s => [s.id, s]));
 
@@ -5809,7 +5962,7 @@ function progress(s){
   return Math.round(a / n * 100);
 }
 
-const state = { view:"home", sid:null, tab:"cards", query:"", flash:null, quiz:null, syn:null };
+const state = { view:"home", sid:null, tab:"cards", query:"", flash:null, quiz:null, syn:null, ecf:null };
 
 function fmt(s){ return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
 function esc(s){ return String(s).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch])); }
@@ -5927,7 +6080,7 @@ function renderResults(){
 /* ---------- Saison ---------- */
 function renderSeason(){
   const s = byId[state.sid];
-  const tabs = [["cards","Mémo"],["syn","Synthèses"],["flash","Flash"],["quiz","QCM"]];
+  const tabs = [["cards","Mémo"],["syn","Synthèses"],["flash","Flash"],["quiz","QCM"],["ecf","ECF"]];
   $app.innerHTML = `<div style="--c:${s.c}">
     <header class="top"><div class="top-in">
       <div class="top-row">
@@ -5947,6 +6100,7 @@ function renderPane(){
   if(state.tab === "cards") pane.innerHTML = cardsHTML(s);
   else if(state.tab === "syn") pane.innerHTML = synHTML(s);
   else if(state.tab === "flash") pane.innerHTML = flashHTML(s);
+  else if(state.tab === "ecf") pane.innerHTML = ecfHTML(s);
   else pane.innerHTML = quizHTML(s);
 }
 
@@ -6173,6 +6327,56 @@ function quizHTML(s){
     </article>`;
   }).join("")}</div>`;
 }
+/* ---------- ECF (examen de fin de saison O'clock) ---------- */
+let ecfBest = store.get("ecf", {});
+const sameSet = (a, b) => a.length === b.length && a.every(x => b.includes(x));
+function ecfHTML(s){
+  if(!s.ecf){
+    return `<div class="panel syn-empty"><p class="mono" style="color:var(--c);font-size:12px">$ ./ecf --saison ${s.id.toLowerCase()}<br>// aucun sujet trouvé</p>
+      <h3>ECF à venir</h3><p>L'ECF de fin de saison n'a pas encore été ajouté. Envoie le lien du corrigé de ton formulaire pour l'intégrer ici.</p></div>`;
+  }
+  const x = s.ecf, e = state.ecf, n = x.qs.length;
+  if(!e){
+    const b = ecfBest[s.id];
+    return `<div class="panel">
+      <p class="mono" style="color:var(--c);font-size:12px">$ ./ecf --saison ${s.id.toLowerCase()} --sans-notes</p>
+      <h3>${esc(x.title)}</h3>
+      <p>${esc(x.intro)}</p>
+      <div class="meta"><span>Questions <b>${n}</b></span><span>Meilleur score <b>${b ? `${b.score}/${n}` : "—"}</b></span>${b ? `<span>Le <b>${new Date(b.date).toLocaleDateString("fr-FR")}</b></span>` : ""}</div>
+      <div class="btn-row"><button class="btn pri" data-act="ecf-start">Commencer l'ECF ›</button></div>
+    </div>`;
+  }
+  if(!e.done){
+    const answered = e.picks.filter(p => p.length).length;
+    return `<div class="fl-head"><span>${esc(x.title)}</span><button class="toggle" data-act="ecf-quit">Abandonner</button></div>
+    <div class="ecf-list">${x.qs.map((q, i) => `<div class="ecf-q${e.tried && !e.picks[i].length ? " todo" : ""}" id="ecf-${i}">
+      <span class="n">QUESTION ${i+1}/${n}</span>
+      <p class="qq">${esc(q.q)}</p>${q.a.length > 1 ? `<span class="multi">Plusieurs réponses possibles</span>` : ""}
+      <div class="opts">${q.o.map((o, j) => `<button class="opt${q.a.length > 1 ? " chk" : ""}" role="${q.a.length > 1 ? "checkbox" : "radio"}" aria-pressed="${e.picks[i].includes(j)}" aria-checked="${e.picks[i].includes(j)}" data-act="ecf-pick" data-q="${i}" data-j="${j}"><span class="l">${q.a.length > 1 ? (e.picks[i].includes(j) ? "✓" : "") : "ABCDEFGH"[j]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+    </div>`).join("")}</div>
+    <div class="ecf-bar"><span>${answered}/${n} répondues</span><button class="btn pri" data-act="ecf-submit">Valider l'ECF</button></div>`;
+  }
+  const res = x.qs.map((q, i) => sameSet(e.picks[i], q.a));
+  const good = res.filter(Boolean).length;
+  const pct = Math.round(good / n * 100);
+  const list = x.qs.map((q, i) => ({q, i, ok: res[i]})).filter(r => !e.onlyWrong || !r.ok);
+  return `<div class="panel"><div class="score">
+    ${ring(pct, "lg")}
+    <div><span class="exit ${pct >= 70 ? "ok" : "ko"}">exit ${pct >= 70 ? 0 : 1}</span>
+      <h3>${good} / ${n} points</h3><p>${pct >= 90 ? "Excellent, prête pour le jour J." : pct >= 70 ? "Validé. Relis les explications de tes erreurs." : "À retravailler : repasse par le mémo et les synthèses de la saison."}</p></div>
+  </div>
+  <div class="btn-row"><button class="btn pri" data-act="ecf-start">Refaire l'ECF</button></div></div>
+  <div class="corr-h"><h4>Correction</h4>${good < n ? `<button class="toggle" aria-pressed="${!!e.onlyWrong}" data-act="ecf-only-wrong">${e.onlyWrong ? "Erreurs seulement ✓" : "Afficher seulement les erreurs"}</button>` : ""}</div>
+  <div class="corr">${list.map(({q, i, ok}) => `<article class="ci${ok ? "" : " bad"}">
+      <span class="st ${ok ? "ok" : "ko"}">Q${i+1} · ${ok ? "✓ CORRECT" : "✗ ERREUR"}</span>
+      <p class="cq">${esc(q.q)}</p>
+      <div class="a">${ok
+        ? `<span>ta réponse</span><b class="g">${q.a.map(j => esc(q.o[j])).join(" · ")}</b>`
+        : `<span>ta réponse</span><span class="y">${e.picks[i].length ? e.picks[i].map(j => esc(q.o[j])).join(" · ") : "—"}</span><span>la bonne</span><b class="g">${q.a.map(j => esc(q.o[j])).join(" · ")}</b>`}</div>
+      <p class="ex">${esc(q.e)}</p>
+    </article>`).join("")}</div>`;
+}
+
 function finishQuiz(s){
   const z = state.quiz;
   z.done = true;
@@ -6191,15 +6395,15 @@ $app.addEventListener("click", e => {
   const s = state.sid ? byId[state.sid] : null;
   const top = () => window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
 
-  if(act === "open"){ state.view = "season"; state.sid = b.dataset.id; state.tab = "cards"; state.flash = null; state.quiz = null; state.syn = null; renderSeason(); window.scrollTo(0,0); return; }
+  if(act === "open"){ state.view = "season"; state.sid = b.dataset.id; state.tab = "cards"; state.flash = null; state.quiz = null; state.ecf = null; state.syn = null; renderSeason(); window.scrollTo(0,0); return; }
   if(act === "goto"){
-    state.view = "season"; state.sid = b.dataset.id; state.tab = "cards"; state.flash = null; state.quiz = null; renderSeason();
+    state.view = "season"; state.sid = b.dataset.id; state.tab = "cards"; state.flash = null; state.quiz = null; state.ecf = null; renderSeason();
     const sec = document.getElementById("sec-" + b.dataset.sec);
     if(sec){ sec.open = true; sec.scrollIntoView({block:"start"}); }
     return;
   }
   if(act === "gosyn"){
-    state.view = "season"; state.sid = b.dataset.id; state.tab = "syn"; state.syn = +b.dataset.i; state.flash = null; state.quiz = null;
+    state.view = "season"; state.sid = b.dataset.id; state.tab = "syn"; state.syn = +b.dataset.i; state.flash = null; state.quiz = null; state.ecf = null;
     renderSeason(); window.scrollTo(0,0); return;
   }
   if(act === "syn-open"){ state.syn = +b.dataset.i; renderPane(); window.scrollTo(0,0); return; }
@@ -6244,6 +6448,28 @@ $app.addEventListener("click", e => {
     return;
   }
   if(act === "only-wrong"){ state.quiz.onlyWrong = !state.quiz.onlyWrong; renderPane(); return; }
+  /* ECF */
+  if(act === "ecf-start"){ state.ecf = {picks: s.ecf.qs.map(() => []), done: false, tried: false, onlyWrong: false}; renderPane(); window.scrollTo(0,0); return; }
+  if(act === "ecf-quit"){ state.ecf = null; renderPane(); window.scrollTo(0,0); return; }
+  if(act === "ecf-pick"){
+    const qi = +b.dataset.q, j = +b.dataset.j, q = s.ecf.qs[qi], p = state.ecf.picks[qi];
+    if(q.a.length > 1){ const k = p.indexOf(j); k < 0 ? p.push(j) : p.splice(k, 1); }
+    else state.ecf.picks[qi] = [j];
+    const y = window.scrollY; renderPane(); window.scrollTo(0, y); return;
+  }
+  if(act === "ecf-submit"){
+    const e = state.ecf, miss = e.picks.findIndex(p => !p.length);
+    if(miss >= 0){
+      e.tried = true; renderPane();
+      const el = document.getElementById("ecf-" + miss); if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
+    e.done = true;
+    const good = s.ecf.qs.filter((q, i) => sameSet(e.picks[i], q.a)).length;
+    if(!ecfBest[s.id] || good >= ecfBest[s.id].score){ ecfBest[s.id] = {score: good, date: Date.now()}; store.set("ecf", ecfBest); }
+    renderPane(); window.scrollTo(0,0); return;
+  }
+  if(act === "ecf-only-wrong"){ state.ecf.onlyWrong = !state.ecf.onlyWrong; renderPane(); return; }
 });
 
 /* Lien direct vers une saison : …#SA3 */
