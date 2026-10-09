@@ -1,5 +1,5 @@
-// Service worker AIS Révision — version 202610090758
-const CACHE = "ais-revision-202610090758";
+// Service worker AIS Révision — version 202610090800
+const CACHE = "ais-revision-202610090800";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
