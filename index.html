@@ -6056,6 +6056,78 @@ SC5:[
     ["Preuve de concept","Démonstration que la faille est exploitable"],
     ["Recommandations","Une remédiation par faiblesse, priorisée et réaliste"]]}},
    {def:"**À retenir** : ① le cadrage protège — sans autorisation écrite, pas de pentest · ② la méthode (PTES) évite l'oubli, elle ne pense pas à votre place · ③ rien n'est linéaire — chaque accès relance l'énumération · ④ en AD, le contexte prime sur le score — la plupart des failles n'ont pas de CVE."}]}
+ ]},
+ {id:"02.1", t:"Chemin de compromission n°1", sub:"Password Spraying, DCSync, Pass the Hash, Golden Ticket — et comment s'en défendre", parts:[
+  {h:"La chaîne : 4 étapes jusqu'au Golden Ticket", g:[
+   {p:"Un chemin de compromission AD classique, étudié ici pour savoir le **détecter et le couper** : Password Spraying → DCSync → Pass the Hash → Golden Ticket."},
+   {steps:[["Password Spraying","Accès initial : premier compte compromis"],["DCSync","Récupération de la base d'authentification du domaine"],["Pass the Hash","Mouvement latéral vers d'autres machines"],["Golden Ticket","Persistance durable sur le domaine"]]}]},
+  {h:"Password Spraying", g:[
+   {def:"**Principe** : tester un seul mot de passe courant sur beaucoup de comptes (au lieu de beaucoup de mots de passe sur un compte). On reste ainsi sous le seuil de verrouillage, contrairement au brute-force."},
+   {kv:[
+    ["Pré-requis","Une liste de comptes valides (reconnaissance, BloodHound)"],
+    ["Outil vu en cours","NetExec (nxc)"],
+    ["Signal défensif","Beaucoup d'échecs d'authentification répartis sur de nombreux comptes, au même moment"]]},
+   {def:"**Défense** : politique de mots de passe robuste, verrouillage de compte, MFA, et surveillance des connexions horizontales (un même IP qui teste tout l'annuaire)."}]},
+  {h:"DCSync", g:[
+   {def:"**Principe** : un compte disposant des droits de réplication AD peut se faire passer pour un contrôleur de domaine et demander les secrets de n'importe quel compte. Aucune exécution de code sur le DC."},
+   {table:{head:["Droit AD exploité","Effet"], rows:[
+    ["Replicating Directory Changes","Répliquer la plupart des attributs"],
+    ["Replicating Directory Changes All","Répliquer aussi les secrets (hashs)"]]}},
+   {def:"**Défense** : auditer régulièrement qui possède ces droits de réplication (ils ne devraient appartenir qu'aux DC et à quelques comptes d'admin), et alerter sur toute réplication venant d'une source non-DC."}]},
+  {h:"Pass the Hash", g:[
+   {def:"**Principe** : s'authentifier avec le hash NTLM d'un compte sans connaître le mot de passe. NTLM utilise le hash comme clé du challenge-réponse : le posséder suffit. C'est la faiblesse de conception de NTLM."},
+   {kv:[
+    ["D'où vient le hash","Réplication AD, base de comptes locale, ou mémoire du processus d'authentification"],
+    ["Pourquoi ça marche","NTLM : pas de sel, pas d'itération → le hash vaut le mot de passe"]]},
+   {def:"**Défense (rappel SC3-07)** : c'est pour couper cette voie qu'on désactive NTLM au profit de Kerberos sur les parcs modernes. Ajouter : signature SMB, protection du processus LSA (Credential Guard), modèle de tiering pour ne jamais exposer un hash d'admin sur un poste."}]},
+  {h:"Golden Ticket", g:[
+   {def:"**Principe** : le compte **krbtgt** signe et chiffre tous les tickets Kerberos du domaine. Qui détient son hash peut forger un ticket d'accès valide pour n'importe quel compte : c'est une technique de persistance, qui survit même à un changement de mot de passe de la cible usurpée."},
+   {kv:[
+    ["Durée de vie","Jusqu'à expiration (10 h par défaut, parfois forcée à des années)"],
+    ["Seule vraie parade","Changer deux fois de suite le mot de passe de krbtgt (il garde 2 clés en mémoire) — procédure officielle Microsoft après tout incident majeur"]]}]},
+  {h:"Récap & défense", g:[
+   {table:{head:["Étape","Phase PTES","Résultat"], rows:[
+    ["Password Spraying","Accès aux identifiants","Premier compte compromis"],
+    ["DCSync","Accès aux identifiants","Base d'authentification complète (dont krbtgt)"],
+    ["Pass the Hash","Mouvement latéral","Admin d'autres machines"],
+    ["Golden Ticket","Persistance","Accès permanent au domaine"]]}},
+   {def:"**Côté défense** : surveiller les connexions horizontales (spray) · auditer les ACL AD régulièrement (aucun droit de réplication inattendu) · désactiver NTLM et activer la signature SMB · changer 2× le mot de passe de krbtgt après tout incident majeur."}]}
+ ]},
+ {id:"02.2", t:"NTLM & Kerberos", sub:"3 modes d'authentification AD, flux Kerberos en 6 échanges, AS-REP Roasting & Kerberoasting", parts:[
+  {h:"AD : 3 façons de s'authentifier", g:[
+   {table:{head:["Protocole","Principe"], rows:[
+    ["NTLM","Challenge-réponse. Utilisé seulement quand Kerberos ne peut pas être négocié"],
+    ["Kerberos","Protocole par défaut. Des tickets délivrés par le KDC"],
+    ["AD CS","Authentification par certificat, via l'extension PKINIT"]]}}]},
+  {h:"NTLM : principe & faiblesses", g:[
+   {def:"**Flux** : ① NEGOTIATE (le client annonce ses capacités) · ② CHALLENGE (le serveur envoie un défi aléatoire) · ③ AUTHENTICATE (réponse calculée avec le hash). Ni le mot de passe ni le hash ne circulent — seule la réponse au défi circule."},
+   {table:{head:["Objet","Où","Usage"], rows:[
+    ["Hash NT","Base de comptes, mémoire LSA","Réutilisable, vaut le mot de passe"],
+    ["Net-NTLMv1 / v2","Sur le réseau","Dépend du défi → ne sert qu'une fois"]]}},
+   {def:"**4 faiblesses structurelles** : ① pas d'authentification mutuelle — le client ne vérifie jamais le serveur · ② le hash vaut le mot de passe (ni sel, ni itération) · ③ la résolution de noms est bavarde — quand le DNS échoue, Windows diffuse sa demande sur le réseau · ④ des contre-mesures existent (signature SMB, LLMNR désactivé) mais sont rarement toutes en place."}]},
+  {h:"Kerberos : les 3 acteurs", g:[
+   {cols:[
+    ["Client","utilisateur ou machine","Sa clé dérive de son mot de passe."],
+    ["KDC","porté par le DC","Son secret est la clé du compte krbtgt."],
+    ["Service","identifié par un SPN","Sa clé chiffre les tickets qui lui sont destinés."]]}]},
+  {h:"Les 6 échanges Kerberos", g:[
+   {table:{head:["Échange","Contenu & objectif"], rows:[
+    ["1. AS-REQ","Client → KDC : identité + horodatage chiffré avec la clé dérivée du mot de passe = pré-authentification"],
+    ["2. AS-REP","KDC → client : le TGT (chiffré avec la clé de krbtgt) + une clé de session + le PAC (identité et groupes). Le « passeport »."],
+    ["3. TGS-REQ","Client → KDC : TGT + authenticator + SPN du service voulu"],
+    ["4. TGS-REP","KDC → client : ticket de service (ST) chiffré avec la clé du compte de service"],
+    ["5. AP-REQ","Client → service : présente le ST + un nouvel authenticator"],
+    ["6. AP-REP","Service → client : horodatage rechiffré = authentification mutuelle (ce qui manque à NTLM)"]]}},
+   {def:"**Vocabulaire** : TGT = ticket générique (pour demander d'autres tickets) · ST = ticket de service · PAC = carte d'identité insérée par le KDC. Le service ne rappelle jamais le KDC : il déchiffre avec sa clé et lit le PAC."},
+   {def:"**4 points clés** : ① le KDC authentifie, il n'autorise pas (l'autorisation vient du PAC lu par le service) · ② le TGS répond à tout compte authentifié, pour n'importe quel SPN · ③ tout repose sur des mots de passe (krbtgt chiffre les TGT, le compte de service chiffre les ST) · ④ la pré-authentification est la seule barrière d'entrée."}]},
+  {h:"AS-REP Roasting & Kerberoasting : détecter et corriger", g:[
+   {p:"Deux faiblesses de configuration que l'auditeur recherche pour les faire corriger."},
+   {table:{head:["","AS-REP Roasting","Kerberoasting"], rows:[
+    ["Cause","Pré-authentification désactivée sur un compte","Un compte porte un SPN avec un mot de passe faible"],
+    ["Compte requis","Aucun","Un compte du domaine, même sans privilège"],
+    ["Event Windows","4768 (sans pré-auth)","4769"]]}},
+   {def:"**Détecter** : pic d'événements 4768 sans pré-auth · volume anormal de 4769 par compte · chiffrement RC4 alors que le domaine est en AES · compte-leurre porteur d'un SPN jamais utilisé (canary)."},
+   {def:"**Corriger** : ne jamais désactiver la pré-authentification · passer les comptes de service en **gMSA** (mot de passe long, géré, tournant) · supprimer les SPN inutilisés · désactiver RC4 au profit d'AES · aucun compte de service dans un groupe privilégié. Les comptes machine portent aussi des SPN, mais leur mot de passe aléatoire les rend incassables."}]}
  ]}
 ]
 };
