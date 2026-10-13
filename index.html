@@ -2197,11 +2197,74 @@ quiz:[
  {q:"Comment mettre à jour l'image d'un service Swarm sans coupure ?", o:["docker service update --image … avec un rolling update","docker service rm puis docker service create","docker swarm init --force-new-cluster","docker node demote sur chaque nœud"], e:"Le rolling update remplace les réplicas par lots (--update-parallelism) avec un délai (--update-delay). En cas de problème : docker service update --rollback."}
 ]},
 
-/* ------------------------------------------------------------------ SC5 (à venir) */
+/* ------------------------------------------------------------------ SC5 */
 {id:"SC5", bloc:"C", title:"Pentesting", c:"#ff3d7f",
-sections:[],
+sections:[
+ {t:"Le lab de pentest AD", ref:"fiche 01.1", g:[
+  {h:"Architecture : 3 VMs", kv:[
+   ["DC01","Contrôleur de domaine : Windows Server, rôle ADDS, DNS du domaine, IP fixe, DNS pointé sur lui-même"],
+   ["WS01","Poste client Windows joint au domaine : DNS = IP du DC, IPv6 désactivé"],
+   ["Kali","Machine d'attaque (Debian + outils offensifs), DNS pointé sur le DC pour résoudre les noms AD"],
+   ["Règle d'or DNS","Le client ET Kali pointent leur DNS sur le DC, sinon jonction et attaques AD échouent"],
+   ["Lab isolé","Jamais sur un réseau de production"]]},
+  {h:"Interstellar & tiering", kv:[
+   ["main.ps1","Script unique de déploiement d'Interstellar, lancé sur le DC en admin du domaine (-EscLab)"],
+   ["Durée de déploiement","20 à 40 min ; l'étape SQL Server est la plus longue"],
+   ["Faiblesses déployées","ACL abusives, délégations Kerberos, comptes de service"],
+   ["Flags","13 flags au format INTERSTELLAR{...}"],
+   ["Tier 0","DC et admins du domaine"],
+   ["Tier 1","Serveurs"],
+   ["Tier 2","Postes de travail"],
+   ["nxc (NetExec)","Successeur de crackmapexec : premier réflexe de reconnaissance SMB"]]},
+  {h:"Distributions offensives", table:{head:["Distribution","Base","En un mot"], rows:[
+   ["Kali Linux","Debian","Le standard, très documenté (celle de la formation)"],
+   ["Parrot Security","Debian","Plus légère, orientée vie privée"],
+   ["BlackArch","Arch","Catalogue d'outils très large"],
+   ["Commando VM","Windows","Un poste d'attaque Windows"],
+   ["Exegol","Docker","Un conteneur propre par mission, sans pollution entre clients"]]}}]},
+ {t:"Méthodologie de pentest", ref:"fiche 01.2", g:[
+  {h:"Cadre légal & ROE", kv:[
+   ["Pentest","Simulation d'attaques réelles, dans un périmètre défini avec le client, pour trouver les failles avant un attaquant"],
+   ["Ce n'est pas","Un scan automatisé, un audit de conformité, ni une garantie d'exhaustivité"],
+   ["Art. 323-1","Accès frauduleux à un système : 2 ans, 60 000 €"],
+   ["Art. 323-2","Entrave au fonctionnement : 5 ans, 150 000 €"],
+   ["Art. 323-3","Modification de données : 5 ans, 150 000 €"],
+   ["ROE","Rules of Engagement : autorisation écrite, bornes et cibles, règles (DoS, phishing, MITM), créneaux et contacts"]]},
+  {h:"Black, Grey, White Box", kv:[
+   ["Black Box","Aucune connaissance initiale : on part d'une IP, comme un attaquant externe"],
+   ["Grey Box","Un compte standard, schéma partiel : meilleur rapport temps/couverture"],
+   ["White Box","Accès au code, à l'infra, à la doc : couverture maximale"]]},
+  {h:"PTES : 7 phases", steps:[
+   "Pré-engagement : questionnaire, entretien, signature des ROE",
+   "Collecte d'informations : OSINT, énumération (la phase la plus longue)",
+   "Évaluation des vulnérabilités : pistes CVE et vecteurs d'attaque",
+   "Analyse des vulnérabilités : croiser les versions avec les CVE + score CVSS",
+   "Exploitation : obtenir un accès, exécuter du code, élever ses privilèges",
+   "Post-exploitation : mouvement latéral, chemin vers le Tier 0",
+   "Rapport : le seul livrable que le client garde"]},
+  {h:"CVE, CVSS & surface d'attaque", kv:[
+   ["CVE","Common Vulnerabilities and Exposures (MITRE) : identifiant unique d'une faille, ex. CVE-2021-40469"],
+   ["CVSS 0.0-3.9","Faible"],
+   ["CVSS 4.0-6.9","Modérée"],
+   ["CVSS 7.0-8.9","Élevée"],
+   ["CVSS 9.0-10.0","Critique"],
+   ["Failles AD","La plupart n'ont aucune CVE : ce sont des erreurs de configuration"],
+   ["Boucle itérative","Énumération → analyse → exploitation → post-exploitation → nouvelle énumération"],
+   ["Distance 3 → 0","Internet → réseau de l'entreprise → même sous-réseau → local sur la machine"]]}]}
+],
 notes:[],
-quiz:[]}
+quiz:[
+ {q:"Sur quelle machine Kali doit-elle pointer son DNS dans le lab AD ?", o:["Le contrôleur de domaine (DC01)","Le poste client (WS01)","Un DNS public (8.8.8.8)","Elle-même (127.0.0.1)"], e:"Le DC est aussi le DNS du domaine : sans lui, Kali ne résout ni les noms AD ni les enregistrements SRV (Kerberos, LDAP), et la plupart des attaques échouent."},
+ {q:"Que vise généralement une attaque AD dans un modèle de tiering ?", o:["Passer d'un tier à un autre jusqu'au Tier 0","Saturer les postes du Tier 2","Désactiver le DNS","Supprimer les comptes de service"], e:"Tier 0 = DC et admins du domaine, Tier 1 = serveurs, Tier 2 = postes. L'attaquant part souvent d'un poste (Tier 2) et cherche un chemin jusqu'au Tier 0."},
+ {q:"Quel outil est le successeur de crackmapexec ?", o:["nxc (NetExec)","Nmap","BloodHound","Metasploit"], e:"NetExec (commande nxc) reprend crackmapexec. nxc smb <IP> renvoie notamment le nom du domaine : c'est le premier réflexe de reconnaissance SMB."},
+ {q:"Quelle distribution offensive fournit un conteneur Docker propre par mission ?", o:["Exegol","Parrot Security","BlackArch","Commando VM"], e:"Exegol part d'un conteneur vierge à chaque mission : aucune pollution entre deux clients et une bonne traçabilité des artefacts."},
+ {q:"Quel document autorise par écrit le pentesteur à attaquer la cible ?", o:["Les ROE (Rules of Engagement)","Le rapport de pentest","Le score CVSS","Le PTES"], e:"Sans autorisation écrite du propriétaire, un pentest est une infraction pénale. Les ROE fixent l'autorisation, les cibles, les techniques permises, les créneaux et les contacts."},
+ {q:"Quelle peine prévoit l'article 323-1 du Code pénal (accès frauduleux) ?", o:["2 ans et 60 000 €","5 ans et 150 000 €","1 an et 15 000 €","10 ans et 300 000 €"], e:"323-1 : accès frauduleux, 2 ans et 60 000 €. Entraver le fonctionnement (323-2) ou modifier des données (323-3) monte à 5 ans et 150 000 €."},
+ {q:"Quel type de test offre le meilleur rapport temps/couverture ?", o:["Grey Box","Black Box","White Box","Red Box"], e:"En Grey Box, on dispose d'un compte standard et d'un schéma partiel. Dans la formation, on part en Black Box puis on passe en Grey Box dès le premier compte compromis."},
+ {q:"Combien de phases compte le standard PTES ?", o:["7","5","4","10"], e:"Pré-engagement, collecte d'informations, évaluation des vulnérabilités, analyse des vulnérabilités, exploitation, post-exploitation, rapport. Le PTES dit quoi faire, pas comment."},
+ {q:"Un score CVSS de 7.5 correspond à une gravité…", o:["Élevée","Modérée","Critique","Faible"], e:"0.0-3.9 faible, 4.0-6.9 modérée, 7.0-8.9 élevée, 9.0-10.0 critique."},
+ {q:"Pourquoi le score CVSS est-il limité pour évaluer un Active Directory ?", o:["La plupart des chemins de compromission AD sont des erreurs de configuration sans CVE","Le CVSS ne s'applique qu'à Linux","Les CVE AD sont toutes critiques","Le CVSS ne mesure que le réseau"], e:"ACL abusives, délégations Kerberos, comptes de service, mots de passe dans l'attribut description… n'ont pas de CVE. En AD, le contexte prime sur le score."}
+]}
 ];
 
 /* =====================================================================
@@ -5898,6 +5961,101 @@ SC4:[
     ["docker service create / ls / ps","Créer / lister / voir les tâches"],
     ["docker service update / rm","Mettre à jour / supprimer"]]},
    {def:"**À retenir** : Swarm = clustering Docker natif · managers planifient, workers exécutent · services = conteneurs distribués & scalables · rolling updates = maj sans coupure · toujours un nombre impair de managers pour éviter le split-brain. Swarm est parfait pour un premier pas dans l'orchestration ; pour aller plus loin : Kubernetes."}]}
+ ]}
+],
+/*@SC5*/
+SC5:[
+ {id:"01.1", t:"L'environnement de travail", sub:"Monter le lab AD isolé (DC01/WS01/Kali), déployer Interstellar, distros offensives", parts:[
+  {h:"Objectifs de la séquence", g:[
+   {p:"Avant d'attaquer, on construit son terrain. L'épisode 1 pose les fondations du lab et fait le tour des distributions offensives."},
+   {steps:["Monter un lab Active Directory isolé","Déployer une cible volontairement vulnérable (Interstellar)","Connaître les environnements offensifs (Kali, Parrot, BlackArch, Exegol…)","Prendre l'habitude de tout noter"]}]},
+  {h:"Architecture du laboratoire : 3 VMs", g:[
+   {cols:[
+    ["DC01","contrôleur de domaine","Windows Server · rôle ADDS · DNS du domaine. IP fixe, DNS pointé sur lui-même."],
+    ["WS01","poste client","Windows joint au domaine. DNS pointé sur DC01 · IPv6 désactivé."],
+    ["KALI","machine d'attaque","Debian + outils offensifs. DNS pointé sur le DC pour résoudre les noms AD."]]},
+   {def:"**Règle d'or** : le DNS du client ET de Kali doit pointer sur le contrôleur de domaine. Sans le bon DNS, la jonction au domaine échoue et la plupart des attaques AD ne résolvent pas les noms."}]},
+  {h:"Monter le DC & joindre le client", g:[
+   {table:{head:["DC01 — contrôleur de domaine","WS01 — poste client"], rows:[
+    ["1. Nommer la machine DC01","1. Nommer la machine WS01"],
+    ["2. Fixer l'adresse IP","2. Ajouter l'IP du DC comme DNS primaire"],
+    ["3. Pointer le DNS sur elle-même","3. Désactiver l'IPv6"],
+    ["4. Installer le rôle ADDS","4. Joindre le domaine"],
+    ["5. Promouvoir en première forêt → redémarrage",""]]}},
+   {p:"Le DC n'est pas qu'un serveur : c'est aussi le DNS. Toutes les requêtes AD passent par là (enregistrements SRV Kerberos, LDAP…)."}]},
+  {h:"Déployer le lab Interstellar", g:[
+   {p:"Un seul point d'entrée : **main.ps1**, sur le DC, en administrateur du domaine."},
+   {code:"git clone https://github.com/J4r0d-x55/AD_Pentest_Lab_Interstellar\ncd AD_Pentest_Lab_Interstellar\npowershell -ep bypass -File .\\main.ps1 -EscLab\n# Compter 20 à 40 min. L'étape SQL Server est la plus longue."},
+   {table:{head:["Ce qui est déployé","Contenu"], rows:[
+    ["Annuaire","OU, groupes et comptes en modèle de tiering"],
+    ["Faiblesses","ACL abusives, délégations Kerberos, comptes de service"],
+    ["Services vulnérables","SQL Server, partages, applis volontairement cassées"],
+    ["Flags","13 flags au format INTERSTELLAR{...}"]]}},
+   {def:"**Modèle de tiering** : Tier 0 = DC, admins du domaine · Tier 1 = serveurs · Tier 2 = postes. Le but des attaques AD est souvent de passer d'un tier à un autre."}]},
+  {h:"Panorama des distributions offensives", g:[
+   {table:{head:["Distribution","Base","En un mot"], rows:[
+    ["Kali Linux","Debian","Le standard, très documenté — à défaut, choisir celle-là"],
+    ["Parrot Security","Debian","Plus légère, orientée vie privée"],
+    ["BlackArch","Arch","Catalogue d'outils très large"],
+    ["Commando VM","Windows","Un poste d'attaque Windows"],
+    ["Exegol","Docker","Un conteneur propre par mission"]]}},
+   {p:"Machine d'attaque de la formation : **Kali Linux**. ISO à télécharger sur kali.org/get-kali/ puis installation dans l'hyperviseur."},
+   {p:"**Exegol** est une approche moderne : on part d'un conteneur Docker vierge pour chaque mission → aucune pollution entre deux clients, traçabilité des artefacts."}]},
+  {h:"Checklist de fin de séquence & à retenir", g:[
+   {steps:["Le DC répond au ping depuis Kali","Le client est joint au domaine","nxc smb <IP> renvoie le nom du domaine","main.ps1 s'est terminé sans erreur"]},
+   {def:"**À retenir** : le lab est isolé (jamais sur un réseau de prod) · le DNS est le fil conducteur de toute attaque AD · **nxc** (NetExec, successeur de crackmapexec) est le premier réflexe de reconnaissance SMB · tout noter dès le jour 1 (hostnames, IPs, credentials, flags) — le reporting commence maintenant."}]}
+ ]},
+ {id:"01.2", t:"Méthodologie de pentest", sub:"Cadre légal & ROE, PTES en 7 phases, CVE/CVSS, boucle itérative, surface d'attaque", parts:[
+  {h:"Qu'est-ce qu'un pentest ?", g:[
+   {def:"**Pentest** = simulation d'attaques réelles sur un SI, dans un périmètre défini avec le client, pour trouver les vulnérabilités avant qu'un attaquant ne le fasse. Opération offensive, éthique, légale, cadrée par une mission."},
+   {cols:[
+    ["Ce n'est PAS","","Un scan automatisé de vulnérabilités · un audit de conformité · une garantie d'exhaustivité sur tout le SI."],
+    ["Objectif","","Tester les défenses en place, dans un périmètre défini, protéger les actifs et les données."]]}]},
+  {h:"Cadre légal en France & ROE", g:[
+   {p:"Sans autorisation écrite du propriétaire, un pentest est une **infraction pénale**. Le document qui vous protège s'appelle le **ROE**."},
+   {table:{head:["Article","Interdit","Peine"], rows:[
+    ["323-1","Accès frauduleux à un système","2 ans, 60 000 €"],
+    ["323-2","Entrave au fonctionnement","5 ans, 150 000 €"],
+    ["323-3","Modification de données","5 ans, 150 000 €"]]}},
+   {h:"ROE — Rules of Engagement", steps:[["Autorisation explicite","Le droit écrit d'attaquer la cible"],["Bornes et cibles","Souvent une partie du SI seulement"],["Règles à respecter","Déni de service, phishing, MITM : autorisés ou non"],["Créneaux & contacts","Quand tester, qui prévenir, comment tout arrêter"]]},
+   {table:{head:["Type","Connaissance initiale"], rows:[
+    ["Black Box","Aucune. On part d'une IP, comme un attaquant externe"],
+    ["Grey Box","Un compte standard, schéma partiel. Meilleur rapport temps/couverture"],
+    ["White Box","Accès au code, à l'infra, à la doc. Couverture maximale"]]}},
+   {p:"Cette formation : Black Box au départ, Grey Box dès le premier compte compromis."}]},
+  {h:"Le standard PTES : 7 phases", g:[
+   {p:"**PTES** (Penetration Testing Execution Standard, 2009) = cadre ouvert écrit par des praticiens. Pas une certification, pas une liste d'outils : il dit quoi faire, pas comment. Il ne pense pas à votre place, il garantit qu'aucune étape n'est oubliée."},
+   {table:{head:["Phase","Ce qu'on y fait"], rows:[
+    ["1 · Pré-engagement","Questionnaire, entretien, lancement, signature des ROE — tout se joue avant la 1ʳᵉ commande"],
+    ["2 · Collecte d'infos","Phase la plus longue ; OSINT, énumération infra / services / hôtes"],
+    ["3 · Évaluation des vulns","Analyse des infos recueillies, pistes CVE & vecteurs d'attaque"],
+    ["4 · Analyse des vulns","Croiser les versions avec les CVE (MITRE) + score CVSS"],
+    ["5 · Exploitation","Obtenir un accès, exécuter du code, élever ses privilèges"],
+    ["6 · Post-exploitation","Mouvement latéral + élévation horizontale/verticale (chemin vers le Tier 0)"],
+    ["7 · Rapport","Le seul livrable que le client garde"]]}}]},
+  {h:"Collecte appliquée au domaine & CVE/CVSS", g:[
+   {cols:[
+    ["Sans compte","Black Box","Scan de ports · bannière SMB, session nulle · LDAP anonyme · services exposés : FTP, HTTP."],
+    ["Avec un compte","Grey Box","Utilisateurs, groupes, partages · politique de mot de passe · attributs description et info · cartographie BloodHound."]]},
+   {table:{head:["CVSS","Gravité"], rows:[["0.0 – 3.9","Faible"],["4.0 – 6.9","Modérée"],["7.0 – 8.9","Élevée"],["9.0 – 10.0","Critique"]]}},
+   {p:"Calculateur officiel : first.org/cvss/calculator/3.1. **CVE** = Common Vulnerabilities and Exposures (MITRE) : identifiant unique (CVE-2021-40469) pour parler le même langage entre éditeurs, chercheurs et équipes sécu."},
+   {def:"**Clé AD** : dans Active Directory, la plupart des chemins de compromission n'ont AUCUNE CVE — ce sont des erreurs de configuration (ACL abusives, délégations Kerberos, comptes de service, mots de passe dans les attributs description…). Le CVSS ne capte pas ça."}]},
+  {h:"Processus itératif & surface d'attaque", g:[
+   {p:"Un pentest n'est jamais une ligne droite : chaque accès obtenu relance l'énumération depuis un nouveau point de vue."},
+   {steps:[["Énumération","« Que puis-je voir ? »"],["Analyse","« Qu'est-ce qui est faible ? »"],["Exploitation","« Comment j'entre ? »"],["Post-exploitation","« Qu'ai-je gagné ? » → nouveaux accès, nouveau point de vue, nouvelle énumération"]]},
+   {table:{head:["Distance","Périmètre","Exemples"], rows:[
+    ["3","Internet (WAN)","Services exposés"],
+    ["2","Réseau de l'entreprise","Poste invité, Wi-Fi"],
+    ["1","Même sous-réseau","Poste du LAN, LLMNR"],
+    ["0","Local sur la machine","Privilèges locaux"]]}},
+   {p:"Plus l'attaquant est proche de la cible, plus la surface visible grandit. La journée 2 cherchera à passer de 3 → 2 → 1 → 0."}]},
+  {h:"Le rapport & ce qu'il faut retenir", g:[
+   {table:{head:["Composante du rapport","Contenu"], rows:[
+    ["Synthèse direction","Sans jargon : ce qui a été compromis, à quel coût"],
+    ["Chemin d'attaque","Déroulé complet, reproductible par la technique"],
+    ["Preuve de concept","Démonstration que la faille est exploitable"],
+    ["Recommandations","Une remédiation par faiblesse, priorisée et réaliste"]]}},
+   {def:"**À retenir** : ① le cadrage protège — sans autorisation écrite, pas de pentest · ② la méthode (PTES) évite l'oubli, elle ne pense pas à votre place · ③ rien n'est linéaire — chaque accès relance l'énumération · ④ en AD, le contexte prime sur le score — la plupart des failles n'ont pas de CVE."}]}
  ]}
 ]
 };
