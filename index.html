@@ -2250,7 +2250,41 @@ sections:[
    ["CVSS 9.0-10.0","Critique"],
    ["Failles AD","La plupart n'ont aucune CVE : ce sont des erreurs de configuration"],
    ["Boucle itérative","Énumération → analyse → exploitation → post-exploitation → nouvelle énumération"],
-   ["Distance 3 → 0","Internet → réseau de l'entreprise → même sous-réseau → local sur la machine"]]}]}
+   ["Distance 3 → 0","Internet → réseau de l'entreprise → même sous-réseau → local sur la machine"]]}]},
+ {t:"Chemin de compromission AD", ref:"fiche 02.1", g:[
+  {h:"La chaîne en 4 étapes", steps:["Password Spraying : premier compte compromis","DCSync : récupération de la base d'authentification","Pass the Hash : mouvement latéral","Golden Ticket : persistance sur le domaine"]},
+  {h:"Chaque étape et sa parade", kv:[
+   ["Password Spraying","Un seul mot de passe testé sur beaucoup de comptes, sous le seuil de verrouillage — parade : MFA, verrouillage, surveillance des connexions horizontales"],
+   ["DCSync","Un compte aux droits de réplication se fait passer pour un DC — parade : auditer qui détient ces droits, alerter sur une réplication non-DC"],
+   ["Pass the Hash","S'authentifier avec le hash NTLM sans le mot de passe — parade : désactiver NTLM, signature SMB, Credential Guard, tiering"],
+   ["Golden Ticket","Ticket forgé avec la clé krbtgt, persistant — parade : changer deux fois de suite le mot de passe de krbtgt"]]}]},
+ {t:"Authentification : NTLM & Kerberos", ref:"fiche 02.2", g:[
+  {h:"3 modes d'authentification AD", kv:[
+   ["NTLM","Challenge-réponse, utilisé seulement quand Kerberos n'est pas négociable"],
+   ["Kerberos","Par défaut : des tickets délivrés par le KDC"],
+   ["AD CS","Par certificat (extension PKINIT)"]]},
+  {h:"Les 6 échanges Kerberos", table:{head:["Échange","Rôle"], rows:[
+   ["1. AS-REQ","Le client prouve son identité (pré-authentification)"],
+   ["2. AS-REP","Le KDC renvoie le TGT (le passeport) + une clé de session"],
+   ["3. TGS-REQ","Le client présente son TGT et demande un service (SPN)"],
+   ["4. TGS-REP","Le KDC renvoie le ticket de service"],
+   ["5. AP-REQ","Le client présente le ticket au service"],
+   ["6. AP-REP","Le service confirme son identité (authentification mutuelle, ce qui manque à NTLM)"]]}},
+  {h:"Deux faiblesses à surveiller", kv:[
+   ["AS-REP Roasting","Un compte sans pré-authentification → bloc cassable hors ligne. Corriger : ne jamais désactiver la pré-auth (event 4768)"],
+   ["Kerberoasting","Un compte de service à mot de passe faible → ticket cassable hors ligne. Corriger : gMSA, supprimer les SPN inutiles, AES au lieu de RC4 (event 4769)"]]}]},
+ {t:"Exploitation avancée : chemins sans CVE", ref:"fiche 03", g:[
+  {h:"Chaînage d'ACE", kv:[
+   ["ACE","Permission sur un objet AD ; BloodHound en fait les arêtes de son graphe"],
+   ["GenericAll","Contrôle total sur l'objet"],
+   ["ForceChangePassword","Réinitialiser un mot de passe sans le connaître"],
+   ["ReadGmsaPassword","Lire le mot de passe géré d'un compte gMSA"],
+   ["Principe","Une chaîne d'ACL abusives relie un compte ordinaire à un compte privilégié, sans aucune CVE"]]},
+  {h:"Privilèges Windows détournés", kv:[
+   ["gMSA","Mot de passe géré par AD, mais lisible par les comptes porteurs de ReadGmsaPassword"],
+   ["SeDebugPrivilege","Accès à la mémoire de tout processus (dont le processus d'authentification) — à ne jamais déléguer"],
+   ["Backup Operators","SeBackup/SeRestore : lire ou écrire n'importe quel fichier → un sauvegardeur mal cadré est un admin déguisé"]]},
+  {h:"Défense", steps:["Auditer régulièrement les ACL AD (BloodHound côté équipe bleue)","Ne pas déléguer SeDebugPrivilege","Activer LSA Protection et Credential Guard","Traiter Backup Operators comme un groupe privilégié (membres rares, surveillés)"]}]}
 ],
 notes:[],
 quiz:[
@@ -6169,6 +6203,45 @@ SC5:[
     ["Mécanisme","Chaîne d'ACL → gMSA → privilège → identifiants","Privilèges de sauvegarde → copie des secrets"],
     ["Résultat","Réutilisation d'identifiants (PtH)","Base d'authentification du domaine, hors ligne"]]}},
    {def:"**Côté défense** : auditer régulièrement les ACL AD (BloodHound côté équipe bleue) · ne pas déléguer SeDebugPrivilege · activer LSA Protection / Credential Guard · traiter Backup Operators comme privilégié. Ces chemins n'ont aucune CVE : ils ne se trouvent qu'en lisant le graphe des permissions, jamais dans un scanner."}]}
+ ]},
+ {id:"02.3", t:"Kerberos en détail", sub:"Analogie, 3 acteurs, 2 objets, 6 échanges et lexique complet", parts:[
+  {h:"L'idée en une image", g:[
+   {def:"Kerberos vérifie **qui tu es** dans un domaine Windows. On prouve son identité une seule fois pour recevoir un passeport (TGT), puis on échange ce passeport contre des billets d'entrée, service par service."},
+   {p:"Analogie du parc d'attractions : à l'entrée, tu montres ta pièce d'identité → on te donne un bracelet (le TGT). À chaque manège, tu montres ton bracelet au guichet → on te donne un ticket pour ce manège (le ST). Tu donnes le ticket au manège, et tu montes."}]},
+  {h:"Les 3 acteurs & les 2 objets", g:[
+   {cols:[
+    ["Client","utilisateur ou machine","Veut accéder à une ressource. Sa clé dérive de son mot de passe."],
+    ["KDC","hébergé sur le DC","Deux services internes : AS (échanges 1-2) et TGS (3-4). Son secret maître est la clé de krbtgt."],
+    ["Service","identifié par un SPN","La ressource visée. Sa clé chiffre les tickets qui lui sont destinés."]]},
+   {table:{head:["Objet","Rôle"], rows:[
+    ["TGT","Le passeport générique « je suis authentifié ». Chiffré avec la clé de krbtgt (illisible pour le client). Obtenu à l'échange 2."],
+    ["Service Ticket (ST)","Le billet d'entrée pour une ressource précise. Chiffré avec la clé du compte de service. Obtenu à l'échange 4."]]}}]},
+  {h:"Les 6 échanges", g:[
+   {table:{head:["#","Échange","Ce qui circule"], rows:[
+    ["1","AS-REQ","Identité + horodatage chiffré (pré-authentification). Rien à voler : c'est la demande."],
+    ["2","AS-REP","Le TGT + une clé de session + le PAC (identité & groupes)."],
+    ["3","TGS-REQ","Le TGT + un authenticator (preuve fraîche) + le SPN voulu."],
+    ["4","TGS-REP","Le ticket de service, chiffré avec la clé du compte de service."],
+    ["5","AP-REQ","Le ticket de service présenté au service, + un authenticator."],
+    ["6","AP-REP","Horodatage rechiffré = authentification mutuelle (ce qui manque à NTLM)."]]}},
+   {def:"**La logique** : on prouve son identité une fois (1-2) pour recevoir un passeport, puis on l'échange contre des billets service par service (3-4), qu'on présente aux services (5-6). Chaque étape où un secret chiffre quelque chose devient un point à protéger."}]},
+  {h:"Points de vigilance (défense)", g:[
+   {kv:[
+    ["Pré-authentification","La seule barrière d'entrée : sans elle (AS-REP Roasting), le KDC répond à n'importe qui → ne jamais la désactiver"],
+    ["Comptes de service","Un SPN + mot de passe faible = Kerberoasting → passer en gMSA, mots de passe longs et gérés"],
+    ["RC4 vs AES","RC4 (etype 23) est ancien et se casse vite → un DC bien configuré refuse RC4 et impose AES (etype 17/18)"],
+    ["krbtgt","Sa clé chiffre tous les TGT : après tout incident majeur, changer son mot de passe deux fois de suite"]]}]},
+  {h:"Lexique Kerberos", g:[
+   {kv:[
+    ["AD","Active Directory : l'annuaire Windows (comptes, machines, droits d'un domaine)"],
+    ["DC","Domain Controller : serveur qui héberge l'AD et le KDC"],
+    ["KDC","Key Distribution Center : délivre les tickets. Regroupe AS + TGS"],
+    ["AS / TGS","Authentication Service (délivre le TGT) · Ticket Granting Service (délivre les ST)"],
+    ["TGT / ST","Ticket d'authentification générique · Ticket pour un service précis"],
+    ["SPN","Service Principal Name : nom unique d'un service dans l'annuaire (ex. MSSQLSvc/srv.pme.lan:1433)"],
+    ["PAC","Privilege Attribute Certificate : carte d'identité glissée dans le TGT (qui tu es + tes groupes)"],
+    ["Authenticator","Jeton de preuve « fraîche » chiffré avec la clé de session : évite le rejeu"],
+    ["krbtgt","Compte système dont la clé chiffre tous les TGT du domaine"]]}]}
  ]}
 ]
 };
