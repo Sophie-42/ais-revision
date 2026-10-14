@@ -6242,6 +6242,35 @@ SC5:[
     ["PAC","Privilege Attribute Certificate : carte d'identité glissée dans le TGT (qui tu es + tes groupes)"],
     ["Authenticator","Jeton de preuve « fraîche » chiffré avec la clé de session : évite le rejeu"],
     ["krbtgt","Compte système dont la clé chiffre tous les TGT du domaine"]]}]}
+ ]},
+ {id:"02.4", t:"Golden Ticket : la procédure", sub:"Principe, ingrédients, grandes étapes, points bloquants et remédiation", parts:[
+  {h:"Le principe", g:[
+   {def:"Le compte **krbtgt** possède une clé qui chiffre et signe tous les tickets Kerberos du domaine. Qui détient cette clé peut forger un faux TGT au nom de n'importe quel compte, avec les droits qu'il veut, sans jamais s'authentifier auprès du DC. C'est une attaque de **persistance** : le ticket reste valable même après un changement de mot de passe de la cible, tant que la clé de krbtgt ne change pas."},
+   {p:"Pré-requis : la clé de krbtgt n'est accessible qu'après une compromission totale du domaine (DCSync). Le Golden Ticket n'est donc pas un point d'entrée, mais un moyen de garder la main ensuite."}]},
+  {h:"Les 3 ingrédients (récupérés au DCSync)", g:[
+   {table:{head:["Ingrédient","Obtenu avec"], rows:[
+    ["Clé AES256 du krbtgt","Extraction des secrets (secretsdump)"],
+    ["SID du domaine","lookupsid / lecture des ACL"],
+    ["Compte à usurper","Choix de l'attaquant (souvent Administrateur)"]]}},
+   {p:"Pourquoi l'AES et pas le hash NT : un DC bien durci refuse le RC4. Il faut alors la clé AES256 pour que le ticket forgé soit accepté."}]},
+  {h:"Les grandes étapes", g:[
+   {steps:[
+    ["Récupérer la clé AES du krbtgt","Via l'extraction des secrets du domaine (secretsdump)"],
+    ["Récupérer le SID du domaine","Via lookupsid"],
+    ["Figer l'horloge sur celle du DC","Contrainte Kerberos : moins de 5 min d'écart (voir points bloquants)"],
+    ["Forger le ticket","Au nom du compte cible, avec la clé AES (outil : ticketer)"],
+    ["Charger le ticket","La variable KRB5CCNAME indique à Kerberos quel ticket utiliser"],
+    ["Se connecter & prouver","Via WinRM (evil-winrm), puis whoami/hostname sur le DC"]]}]},
+  {h:"Les 2 points bloquants", g:[
+   {kv:[
+    ["Horloge Kerberos","Kerberos refuse tout ticket si l'horloge de l'attaquant s'écarte de plus de 5 min de celle du DC (erreur KRB_AP_ERR_TKT_NYV, « ticket pas encore valide »). Solution : couper la synchro automatique et caler l'heure sur le DC."],
+    ["Exécution sur un DC durci","Les méthodes d'exécution classiques (psexec, smbexec, wmiexec) peuvent être neutralisées par l'antivirus et le pare-feu. C'est un bon point de sécurité côté défense. WinRM reste souvent la voie disponible."]]}]},
+  {h:"Détection & remédiation", g:[
+   {def:"**Remédiation** : réinitialiser **deux fois de suite** le mot de passe du compte krbtgt invalide tous les tickets forgés existants (le compte garde 2 clés en mémoire). C'est la procédure officielle Microsoft après tout incident majeur."},
+   {kv:[
+    ["Détecter","Tickets Kerberos à durée de vie anormale (un golden peut durer des années au lieu de 10 h) · RC4 alors que le domaine est en AES · comptes usurpés inhabituels"],
+    ["Prévenir en amont","Empêcher le DCSync non prévu (auditer les droits de réplication) : sans la clé de krbtgt, pas de Golden Ticket possible"]]},
+   {p:"Pour le rapport : rappeler que des méthodes d'exécution bloquées par l'AV/pare-feu sont un signe positif de durcissement, et recommander le double reset de krbtgt."}]}
  ]}
 ]
 };
