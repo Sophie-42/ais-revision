@@ -6128,6 +6128,47 @@ SC5:[
     ["Event Windows","4768 (sans pré-auth)","4769"]]}},
    {def:"**Détecter** : pic d'événements 4768 sans pré-auth · volume anormal de 4769 par compte · chiffrement RC4 alors que le domaine est en AES · compte-leurre porteur d'un SPN jamais utilisé (canary)."},
    {def:"**Corriger** : ne jamais désactiver la pré-authentification · passer les comptes de service en **gMSA** (mot de passe long, géré, tournant) · supprimer les SPN inutilisés · désactiver RC4 au profit d'AES · aucun compte de service dans un groupe privilégié. Les comptes machine portent aussi des SPN, mais leur mot de passe aléatoire les rend incassables."}]}
+ ]},
+ {id:"03", t:"Exploitation avancée : les chemins sans CVE", sub:"Chaînage d'ACE, gMSA, SeDebugPrivilege, Backup Operators — et comment durcir le domaine", parts:[
+  {h:"Au programme", g:[
+   {p:"Cinq mauvaises configurations AD/Windows qui, enchaînées, ouvrent des chemins de compromission alternatifs — sans aucune CVE. L'enjeu de l'auditeur : les repérer dans le graphe des permissions pour les faire corriger."},
+   {steps:[
+    ["Chaînage d'ACE","Des permissions mal configurées entre objets AD"],
+    ["Comptes gMSA","Un mot de passe de service lisible par trop de comptes"],
+    ["SeDebugPrivilege","Un privilège puissant délégué à tort"],
+    ["Énumération Windows","Relire le graphe de permissions (PowerView, BloodHound)"],
+    ["Backup Operators","Un groupe « sauvegarde » aux droits trop larges"]]}]},
+  {h:"Chaînage d'ACE", g:[
+   {def:"Les **ACE** (Access Control Entries) définissent les permissions sur un objet AD. BloodHound les représente comme les arêtes de son graphe : chaque arête mal configurée est un pas de compromission possible."},
+   {table:{head:["ACE","Ce qu'elle permet"], rows:[
+    ["GenericAll","Contrôle total sur l'objet (ex. ajouter un membre à un groupe)"],
+    ["ForceChangePassword","Réinitialiser le mot de passe d'un utilisateur sans le connaître"],
+    ["ReadGmsaPassword","Lire le mot de passe géré d'un compte de service gMSA"]]}},
+   {def:"**À retenir** : une chaîne d'ACL abusives relie de proche en proche un compte ordinaire à un compte privilégié, sans aucune CVE ni code exécuté sur le DC. D'où « en AD, le contexte prime sur le score »."}]},
+  {h:"Comptes gMSA", g:[
+   {def:"**gMSA** (group Managed Service Account) = compte de service dont AD gère lui-même le mot de passe : long, complexe, renouvelé automatiquement. Objectif initial : supprimer les mots de passe faibles exploités en Kerberoasting."},
+   {kv:[
+    ["Faiblesse","Le mot de passe reste lisible par les comptes autorisés à faire tourner le service (ACE ReadGmsaPassword)"],
+    ["Risque","Qui possède cette ACE peut s'authentifier comme le compte de service, souvent privilégié"],
+    ["Durcir","Limiter et auditer qui porte ReadGmsaPassword ; ne pas sur-privilégier les comptes de service"]]}]},
+  {h:"SeDebugPrivilege", g:[
+   {def:"**SeDebugPrivilege** = privilège Windows qui donne accès à la mémoire de n'importe quel processus, y compris ceux qui tournent sous SYSTEM. Réservé aux administrateurs par défaut, mais parfois délégué à tort à un compte de service."},
+   {kv:[
+    ["Pourquoi c'est sensible","Le processus d'authentification (LSASS) garde en mémoire les secrets des sessions actives"],
+    ["Conséquence","Ce privilège permet d'en extraire des identifiants réutilisables (lien direct avec le Pass-the-Hash du jour 2)"],
+    ["Durcir","LSA Protection, Credential Guard, aucune session d'admin interactive sur un poste de dev, ne jamais déléguer SeDebugPrivilege"]]}]},
+  {h:"Backup Operators", g:[
+   {def:"Groupe intégré à Windows, pensé pour les sauvegardes/restaurations sans donner les droits admin complets. Mais ses deux privilèges, mal cadrés, ouvrent bien plus."},
+   {table:{head:["Privilège","Ce qu'il permet"], rows:[
+    ["SeBackupPrivilege","Lire n'importe quel fichier, quels que soient ses droits NTFS"],
+    ["SeRestorePrivilege","À l'inverse : écrire ou remplacer n'importe lequel"]]}},
+   {def:"**Conséquence** : de quoi copier les fichiers de secrets du système et du domaine, et donc extraire des identifiants sans jamais être administrateur. Un « sauvegardeur » mal cadré est un admin déguisé → traiter Backup Operators comme un groupe privilégié (membres rares, nommés, surveillés)."}]},
+  {h:"Récap & défense", g:[
+   {table:{head:["","Chemin n°2","Chemin n°3"], rows:[
+    ["Point d'entrée","Compte avec une ACE abusive","Compte membre de Backup Operators"],
+    ["Mécanisme","Chaîne d'ACL → gMSA → privilège → identifiants","Privilèges de sauvegarde → copie des secrets"],
+    ["Résultat","Réutilisation d'identifiants (PtH)","Base d'authentification du domaine, hors ligne"]]}},
+   {def:"**Côté défense** : auditer régulièrement les ACL AD (BloodHound côté équipe bleue) · ne pas déléguer SeDebugPrivilege · activer LSA Protection / Credential Guard · traiter Backup Operators comme privilégié. Ces chemins n'ont aucune CVE : ils ne se trouvent qu'en lisant le graphe des permissions, jamais dans un scanner."}]}
  ]}
 ]
 };
