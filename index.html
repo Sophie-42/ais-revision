@@ -2284,7 +2284,23 @@ sections:[
    ["gMSA","Mot de passe géré par AD, mais lisible par les comptes porteurs de ReadGmsaPassword"],
    ["SeDebugPrivilege","Accès à la mémoire de tout processus (dont le processus d'authentification) — à ne jamais déléguer"],
    ["Backup Operators","SeBackup/SeRestore : lire ou écrire n'importe quel fichier → un sauvegardeur mal cadré est un admin déguisé"]]},
-  {h:"Défense", steps:["Auditer régulièrement les ACL AD (BloodHound côté équipe bleue)","Ne pas déléguer SeDebugPrivilege","Activer LSA Protection et Credential Guard","Traiter Backup Operators comme un groupe privilégié (membres rares, surveillés)"]}]}
+  {h:"Défense", steps:["Auditer régulièrement les ACL AD (BloodHound côté équipe bleue)","Ne pas déléguer SeDebugPrivilege","Activer LSA Protection et Credential Guard","Traiter Backup Operators comme un groupe privilégié (membres rares, surveillés)"]}]},
+ {t:"Pentest Linux : élévation de privilèges", ref:"fiche 04", g:[
+  {h:"Méthodologie", steps:["Reconnaissance : ports et services","Énumération : points d'entrée","Accès initial : prendre pied","Énumération locale : droits, cron, SUID, sudo -l","Élévation : user → root"]},
+  {h:"Les 2 réflexes d'énumération locale", kv:[
+   ["find / -perm -u=s -type f 2>/dev/null","Lister les binaires SUID"],
+   ["sudo -l","Voir ce que le compte peut lancer en root"],
+   ["À la main","Savoir le faire sans outil : en mission, LinEnum/linpeas peuvent être bloqués par l'EDR"]]},
+  {h:"Les 6 chemins vers root & leur correction", table:{head:["Faille","Correction"], rows:[
+   ["Binaire SUID root ouvrant un shell","Retirer le bit SUID (chmod u-s)"],
+   ["Commande appelée sans chemin absolu (PATH hijack)","Chemins absolus + PATH fixe"],
+   ["Règle sudo trop large (ALL)","Limiter sudo au strict nécessaire"],
+   ["Script cron root modifiable par un user","Script root:root, droits 755"],
+   ["Sudo sur un éditeur (vi, nano, less…)","Interdire les binaires listés sur GTFOBins"],
+   ["/etc/passwd inscriptible","Droits 644 root:root"]]}},
+  {h:"À retenir", kv:[
+   ["Pas de CVE","L'élévation Linux est presque toujours de l'hygiène de permissions, pas une faille logicielle"],
+   ["GTFOBins","Catalogue de référence pour tout binaire inhabituel en SUID ou en sudo"]]}]}
 ],
 notes:[],
 quiz:[
@@ -6271,6 +6287,44 @@ SC5:[
     ["Détecter","Tickets Kerberos à durée de vie anormale (un golden peut durer des années au lieu de 10 h) · RC4 alors que le domaine est en AES · comptes usurpés inhabituels"],
     ["Prévenir en amont","Empêcher le DCSync non prévu (auditer les droits de réplication) : sans la clé de krbtgt, pas de Golden Ticket possible"]]},
    {p:"Pour le rapport : rappeler que des méthodes d'exécution bloquées par l'AV/pare-feu sont un signe positif de durcissement, et recommander le double reset de krbtgt."}]}
+ ]},
+ {id:"04", t:"Pentest Linux", sub:"Méthodo, accès initial, énumération locale, les 6 chemins d'élévation vers root", parts:[
+  {h:"Méthodologie d'un pentest Linux", g:[
+   {p:"Toujours le même enchaînement : chaque phase prépare la suivante, l'élévation de privilèges arrive en fin de parcours."},
+   {table:{head:["Phase","But"], rows:[
+    ["1 · Reconnaissance","Identifier la cible, les ports ouverts, les services"],
+    ["2 · Énumération","Pages, fichiers, points d'entrée (web, SMB…)"],
+    ["3 · Accès initial","Prendre pied sur la machine"],
+    ["4 · Énumération locale","Droits, cron, binaires SUID, sudo -l"],
+    ["5 · Élévation","Passer de user à root"]]}}]},
+  {h:"Accès initial", g:[
+   {kv:[
+    ["Scan","nmap en deux passes : -sC -sV (versions + scripts par défaut), puis -p- (les 65535 ports, plus lent mais complet)"],
+    ["Énumération web","Sur du Apache + PHP, filtrer sur les fichiers .php (ex. dirb -X .php)"],
+    ["Accès","Un point d'entrée web mal protégé permet de prendre pied, puis on stabilise le terminal"]]}]},
+  {h:"Énumération locale", g:[
+   {def:"Les **2 réflexes** à lancer après chaque nouvel accès : `find / -perm -u=s -type f 2>/dev/null` (les binaires SUID) et `sudo -l` (ce que le compte peut lancer en root)."},
+   {kv:[
+    ["Automatisé","LinEnum.sh, linpeas.sh : énumération complète et rapide"],
+    ["À la main","Savoir faire sans outil : cat /etc/passwd, chercher les SUID, lire /etc/crontab, sudo -l — car en mission les scripts peuvent être bloqués par l'EDR ou l'absence de réseau sortant"]]}]},
+  {h:"Les 6 chemins vers root", g:[
+   {table:{head:["#","Faille","Mécanisme"], rows:[
+    ["1","Binaire SUID root","Le bit SUID fait tourner le programme avec les droits de son propriétaire. Un binaire SUID root qui ouvre un shell donne un shell root."],
+    ["2","Détournement du PATH","Un binaire appelle une commande sans chemin absolu (ls au lieu de /bin/ls) → on place un faux ls en tête du PATH. C'est la brique de base des autres méthodes."],
+    ["3","Droits sudo trop larges","sudo -l affiche ALL → le compte peut tout lancer en root."],
+    ["4","Tâche cron modifiable","cron lance un script en root, mais le script est modifiable par un user → on le réécrit et on attend l'intervalle."],
+    ["5","Sudo sur un éditeur","Un droit sudo sur vi, vim, less, nano, awk… : l'éditeur peut lancer un shell (:!sh) qui hérite des droits root."],
+    ["6","/etc/passwd modifiable","Qui peut écrire dans /etc/passwd ajoute un compte en uid 0."]]}},
+   {p:"Catalogue de référence (côté offensif) pour tout binaire inhabituel en SUID ou en sudo : GTFOBins."}]},
+  {h:"Faille & correction", g:[
+   {table:{head:["Faille exploitée","Correction attendue"], rows:[
+    ["1 · SUID root ouvrant un shell","Retirer le bit SUID (chmod u-s)"],
+    ["2 · Commande sans chemin absolu","Chemins absolus dans les binaires + PATH fixe"],
+    ["3 · Règle sudo trop large","Limiter sudo au strict nécessaire (binaire précis)"],
+    ["4 · Script cron root modifiable","Script appartenant à root:root, droits 755"],
+    ["5 · Sudo sur un éditeur","Interdire les binaires listés sur GTFOBins"],
+    ["6 · /etc/passwd inscriptible","Droits 644 root:root"]]}},
+   {def:"**À retenir** : l'élévation Linux ne vient presque jamais d'une CVE — c'est de l'hygiène de permissions. Les 2 réflexes systématiques après chaque accès : `find / -perm -u=s -type f 2>/dev/null` et `sudo -l`."}]}
  ]}
 ]
 };
