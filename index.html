@@ -6796,64 +6796,214 @@ SEASONS.forEach(s => { s.ecf = ECF[s.id] || null; });
 /* ---------- Antisèche : questions / réponses express par saison ---------- */
 const QR = {
 SA1:[
- {q:"C'est quoi l'encodage ?", a:"Le procédé qui fait correspondre chaque caractère à un nombre binaire (ASCII, UTF-8), sans aucun secret."},
- {q:"C'est quoi le binaire ?", a:"Le système de numération en base 2, avec seulement deux chiffres : 0 et 1."},
- {q:"À quoi sert le CPU ?", a:"Le processeur exécute les instructions, c'est-à-dire les calculs de la machine."},
+ {q:"C'est quoi un bit ?", a:"La plus petite unité d'information, qui vaut 0 ou 1."},
+ {q:"C'est quoi un octet (byte) ?", a:"Un groupe de 8 bits ; 1 byte = 1 octet."},
+ {q:"C'est quoi le binaire ?", a:"Le système de numération en base 2, avec seulement les chiffres 0 et 1."},
  {q:"C'est quoi le système hexadécimal ?", a:"La base 16 (0-9 puis A-F) ; un chiffre hexadécimal vaut 4 bits."},
- {q:"Différence chiffrement symétrique / asymétrique ?", a:"Le symétrique utilise une seule clé partagée, l'asymétrique une paire clé publique / clé privée."},
- {q:"C'est quoi le chiffrement hybride ?", a:"L'asymétrique sert à échanger une clé, puis le symétrique (rapide) chiffre les données : c'est le principe de HTTPS."},
- {q:"C'est quoi les critères DICP ?", a:"Disponibilité, Intégrité, Confidentialité, Preuve : les piliers de la sécurité de l'information."},
+ {q:"C'est quoi le système octal ?", a:"La base 8, avec les chiffres de 0 à 7."},
+ {q:"C'est quoi l'encodage ?", a:"Le procédé qui fait correspondre chaque caractère à un nombre binaire, sans aucun secret."},
+ {q:"C'est quoi l'ASCII ?", a:"Un encodage de 128 caractères, sans accents ni autres alphabets."},
+ {q:"C'est quoi l'Unicode ?", a:"Un encodage qui couvre tous les systèmes d'écriture, souvent encodé en UTF-8."},
+ {q:"À quoi sert le CPU ?", a:"Le processeur exécute les instructions, c'est-à-dire les calculs de la machine."},
+ {q:"C'est quoi la RAM ?", a:"La mémoire vive, rapide et volatile, qui stocke les données en cours d'utilisation."},
+ {q:"C'est quoi la carte mère ?", a:"La carte qui relie et fait communiquer tous les composants de l'ordinateur."},
+ {q:"À quoi sert l'alimentation (PSU) ?", a:"À transformer le courant alternatif du secteur en courant continu basse tension."},
+ {q:"C'est quoi le socket (CPU) ?", a:"Le support de la carte mère sur lequel se branche le processeur ; il doit être compatible."},
+ {q:"C'est quoi le GPU ?", a:"Le processeur graphique, spécialisé dans l'affichage et le calcul parallèle."},
+ {q:"C'est quoi un firmware ?", a:"Un logiciel embarqué dans un composant électronique (BIOS/UEFI, firmware d'un routeur)."},
+ {q:"C'est quoi le BIOS ?", a:"Le firmware de la carte mère qui pilote le démarrage et initialise les périphériques."},
+ {q:"C'est quoi un pilote (driver) ?", a:"Un logiciel qui permet au système de dialoguer avec un périphérique."},
+ {q:"Quel composant est facultatif dans un PC ?", a:"La carte graphique dédiée : beaucoup de processeurs ont une puce graphique intégrée."},
+ {q:"C'est quoi l'architecture de Von Neumann ?", a:"Le modèle des ordinateurs modernes : une mémoire unique pour les programmes et les données."},
  {q:"C'est quoi la virtualisation ?", a:"Une technique qui crée plusieurs machines virtuelles isolées sur un même matériel, via un hyperviseur."},
+ {q:"C'est quoi une machine virtuelle ?", a:"Un ordinateur simulé par logiciel, isolé, qui tourne sur une machine physique."},
+ {q:"C'est quoi un hyperviseur ?", a:"Le logiciel qui crée et fait tourner les machines virtuelles."},
  {q:"C'est quoi une IHM ?", a:"Une Interface Homme-Machine : le moyen de dialoguer avec la machine (ligne de commande, interface graphique)."},
- {q:"C'est quoi un firmware ?", a:"Un logiciel embarqué dans un composant électronique (BIOS/UEFI, firmware d'un routeur)."}
+ {q:"C'est quoi le chiffrement symétrique ?", a:"Un chiffrement qui utilise une seule clé partagée pour chiffrer et déchiffrer (AES)."},
+ {q:"C'est quoi le chiffrement asymétrique ?", a:"Un chiffrement qui utilise une paire de clés, publique et privée (RSA)."},
+ {q:"C'est quoi le chiffrement hybride ?", a:"L'asymétrique sert à échanger une clé, puis le symétrique chiffre les données : c'est le principe de HTTPS."},
+ {q:"Différence chiffrer / hacher ?", a:"Le chiffrement est réversible avec une clé ; le hachage est une transformation à sens unique."},
+ {q:"C'est quoi le hachage ?", a:"La transformation d'une donnée en une empreinte de taille fixe, impossible à inverser."},
+ {q:"C'est quoi les critères DICP ?", a:"Disponibilité, Intégrité, Confidentialité, Preuve : les piliers de la sécurité de l'information."},
+ {q:"C'est quoi la disponibilité ?", a:"La garantie qu'un service est accessible quand on en a besoin."},
+ {q:"C'est quoi l'intégrité ?", a:"La garantie qu'une donnée n'a pas été altérée."},
+ {q:"C'est quoi la confidentialité ?", a:"La garantie qu'une donnée n'est lue que par les personnes autorisées."},
+ {q:"Combien d'adresses en IPv4 ?", a:"Environ 4,3 milliards (2 puissance 32), aujourd'hui épuisées."},
+ {q:"C'est quoi la topologie en étoile ?", a:"Tous les appareils reliés à un point central (box, switch) : la topologie d'un réseau local."},
+ {q:"Quelle est la topologie d'Internet ?", a:"Un mélange de topologies, surtout maillé entre les opérateurs."},
+ {q:"Quelle est la menace n°1 en sécurité ?", a:"L'utilisateur : clic sur un lien piégé, mot de passe faible, clé USB inconnue."},
+ {q:"C'est quoi un bon mot de passe ?", a:"Long, mêlant majuscules, minuscules, chiffres et caractères spéciaux ; idéalement une phrase de passe."},
+ {q:"Meilleure prévention contre les malwares ?", a:"Télécharger ses logiciels depuis des sources fiables et officielles."},
+ {q:"Quelle unité pour la capacité de stockage ?", a:"L'octet (byte) et ses multiples : Ko, Mo, Go, To."},
+ {q:"Quelle unité pour la fréquence du CPU ?", a:"Le hertz (Hz) et ses multiples, comme le gigahertz (GHz)."}
 ],
 SA2:[
  {q:"C'est quoi le BIOS/UEFI ?", a:"Le firmware de la carte mère qui teste le matériel puis lance le système d'exploitation."},
  {q:"Différence MBR / GPT ?", a:"Le MBR est limité à 4 partitions et 2 To ; le GPT lève ces limites et accompagne l'UEFI."},
  {q:"C'est quoi Secure Boot ?", a:"Une fonction UEFI qui n'autorise que le démarrage de chargeurs signés, contre les rootkits."},
+ {q:"C'est quoi le Fast Boot ?", a:"Une option UEFI qui saute une partie des tests du démarrage pour aller plus vite."},
+ {q:"C'est quoi le Clear CMOS ?", a:"Remettre la configuration du BIOS/UEFI aux valeurs d'usine (cavalier, bouton ou pile)."},
+ {q:"À quoi sert le rôle Winload.exe ?", a:"À charger le noyau et les pilotes de démarrage de Windows."},
  {q:"C'est quoi un incident en ITIL ?", a:"Une interruption non planifiée ou une dégradation d'un service."},
+ {q:"Différence incident / demande de service (ITIL) ?", a:"L'incident casse un service ; la demande est une sollicitation normale (accès, installation)."},
+ {q:"C'est quoi un problème en ITIL ?", a:"La cause racine d'un ou plusieurs incidents."},
  {q:"C'est quoi GLPI ?", a:"Un logiciel libre de gestion de parc et de tickets (ITSM)."},
  {q:"Que mesure le TTR ?", a:"Le temps écoulé entre la création d'un ticket et sa résolution."},
+ {q:"À quoi sert la base de connaissances de GLPI ?", a:"À documenter les solutions aux incidents pour les réutiliser."},
  {q:"C'est quoi la réglementation DEEE ?", a:"L'obligation de trier et de confier les déchets électroniques à une filière agréée."},
  {q:"C'est quoi WinPE ?", a:"Un mini-Windows de démarrage, utilisé pour déployer ou dépanner un système."},
- {q:"Différence Office 2024 / Microsoft 365 ?", a:"Office 2024 est une licence perpétuelle ; Microsoft 365 est un abonnement toujours à jour avec OneDrive."},
- {q:"C'est quoi le Wake-on-LAN ?", a:"Une technologie qui réveille un ordinateur à distance via le réseau."}
+ {q:"À quoi sert Sysprep ?", a:"À généraliser une installation Windows (retirer le SID, le nom) avant de la dupliquer."},
+ {q:"C'est quoi WDS ?", a:"Windows Deployment Services : déployer des systèmes par le réseau en PXE."},
+ {q:"C'est quoi le PXE boot ?", a:"Un démarrage par le réseau, utilisé pour installer un système à distance."},
+ {q:"C'est quoi le Wake-on-LAN ?", a:"Une technologie qui réveille un ordinateur à distance via le réseau."},
+ {q:"Différence Office 2024 / Microsoft 365 ?", a:"Office 2024 est une licence perpétuelle ; Microsoft 365 un abonnement toujours à jour avec OneDrive."},
+ {q:"Quel logiciel LibreOffice remplace Excel ?", a:"Calc."},
+ {q:"Quel logiciel LibreOffice remplace Word ?", a:"Writer."},
+ {q:"C'est quoi le gestionnaire de serveur (Windows) ?", a:"L'outil qui installe et gère les rôles et fonctionnalités d'un serveur."},
+ {q:"À quoi sert le Gestionnaire de tâches ?", a:"À surveiller en temps réel l'utilisation du CPU et de la mémoire."},
+ {q:"C'est quoi Process Monitor ?", a:"Un outil Sysinternals qui trace les accès aux fichiers et au registre."},
+ {q:"C'est quoi Autoruns ?", a:"Un outil Sysinternals qui liste tout ce qui se lance au démarrage."},
+ {q:"C'est quoi DISM ?", a:"Un outil de gestion et de réparation des images Windows."},
+ {q:"À quoi sert sfc /scannow ?", a:"À vérifier et réparer les fichiers système de Windows."},
+ {q:"À quoi sert bootrec /fixboot ?", a:"À réparer le secteur de démarrage de Windows."},
+ {q:"C'est quoi MemTest86 ?", a:"Un logiciel qui teste la mémoire vive (RAM) en dehors de Windows."},
+ {q:"C'est quoi CrystalDiskMark ?", a:"Un logiciel qui mesure les performances (débits) d'un disque."},
+ {q:"C'est quoi CrystalDiskInfo ?", a:"Un logiciel qui lit l'état de santé SMART d'un disque."},
+ {q:"Première étape face à un écran noir ?", a:"Vérifier les branchements et les câbles avant tout le reste."},
+ {q:"C'est quoi un outil de prise en main à distance ?", a:"Un logiciel comme TeamViewer ou AnyDesk qui contrôle un poste à distance."},
+ {q:"C'est quoi PuTTY ?", a:"Un client SSH, surtout utilisé depuis Windows pour administrer des serveurs Linux."},
+ {q:"Quelle solution de contrôle à distance est multiplateforme ?", a:"TeamViewer (Windows, macOS, Linux, Android, iOS)."},
+ {q:"Quel système de fichiers par défaut sous Windows ?", a:"NTFS."},
+ {q:"C'est quoi la virtualisation matérielle dans le BIOS ?", a:"Intel VT-x ou AMD-V, nécessaires pour faire tourner des machines virtuelles."},
+ {q:"C'est quoi PSR (Problem Steps Recorder) ?", a:"Un outil Windows qui enregistre les actions d'un utilisateur pour documenter un incident."},
+ {q:"À quoi sert gpupdate /force ?", a:"À réappliquer immédiatement les stratégies de groupe sur un poste."},
+ {q:"Qu'est-ce qu'un datastore (contexte serveur) ?", a:"Un espace de stockage qui héberge les fichiers des machines virtuelles."}
 ],
 SA3:[
  {q:"C'est quoi une adresse IP ?", a:"L'identifiant logique d'une machine sur un réseau (32 bits en IPv4, 128 bits en IPv6)."},
  {q:"C'est quoi un masque de sous-réseau ?", a:"Une suite de bits qui sépare la partie réseau de la partie hôte d'une adresse IP."},
  {q:"C'est quoi la notation CIDR ?", a:"Le nombre de bits à 1 du masque, noté après l'adresse (ex. /24 = 255.255.255.0)."},
+ {q:"Combien d'adresses inutilisables par sous-réseau ?", a:"Deux : l'adresse de réseau et l'adresse de broadcast."},
+ {q:"C'est quoi l'adresse de réseau ?", a:"La première adresse d'un sous-réseau, qui identifie le réseau lui-même."},
+ {q:"C'est quoi l'adresse de broadcast ?", a:"La dernière adresse d'un sous-réseau, qui s'adresse à toutes les machines."},
+ {q:"C'est quoi l'unicast ?", a:"Une communication d'une machine vers une seule autre."},
+ {q:"C'est quoi le broadcast ?", a:"Une communication d'une machine vers toutes les machines du réseau."},
+ {q:"C'est quoi le multicast ?", a:"Une communication d'une machine vers un groupe de machines abonnées."},
  {q:"C'est quoi une adresse MAC ?", a:"L'identifiant physique d'une carte réseau, codé sur 48 bits."},
+ {q:"Combien d'octets réservés au fabricant dans une MAC ?", a:"Les 3 premiers octets (l'OUI)."},
  {q:"C'est quoi le modèle OSI ?", a:"Un modèle en 7 couches qui décrit les étapes d'une communication réseau."},
+ {q:"À quelle couche OSI se trouve IP ?", a:"La couche 3 (réseau)."},
+ {q:"À quelle couche OSI se trouve Ethernet/MAC ?", a:"La couche 2 (liaison)."},
  {q:"Différence TCP / UDP ?", a:"TCP est fiable (accusés de réception, retransmission) ; UDP est rapide mais sans garantie."},
+ {q:"Quel protocole assure une transmission fiable ?", a:"TCP, grâce aux numéros de séquence et aux accusés de réception."},
  {q:"C'est quoi un VLAN ?", a:"Un réseau logique qui cloisonne un switch physique en plusieurs réseaux séparés."},
+ {q:"C'est quoi le mode trunk (Cisco) ?", a:"Un port qui fait passer plusieurs VLAN sur un même lien, avec étiquetage 802.1Q."},
+ {q:"C'est quoi le mode access (Cisco) ?", a:"Un port rattaché à un seul VLAN, pour un poste final."},
+ {q:"Sur quel VLAN sont les ports Cisco par défaut ?", a:"Le VLAN 1."},
  {q:"C'est quoi le NAT ?", a:"La traduction d'adresses qui permet à un réseau privé de sortir sur Internet derrière une IP publique."},
+ {q:"Quelle RFC définit les adresses IPv4 privées ?", a:"La RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)."},
  {q:"C'est quoi le DHCP ?", a:"Un protocole qui distribue automatiquement les adresses IP sur un réseau."},
- {q:"Différence routeur / switch ?", a:"Le routeur relie des réseaux différents (couche 3, IP) ; le switch relie des machines d'un même réseau (couche 2, MAC)."}
+ {q:"C'est quoi le DNS ?", a:"Le service qui traduit les noms de domaine en adresses IP."},
+ {q:"C'est quoi l'ARP ?", a:"Le protocole qui trouve l'adresse MAC correspondant à une adresse IP."},
+ {q:"À quoi sert ICMP ?", a:"Aux messages de contrôle réseau, comme le ping."},
+ {q:"Différence routeur / switch ?", a:"Le routeur relie des réseaux différents (couche 3) ; le switch relie des machines d'un même réseau (couche 2)."},
+ {q:"Sur quelle couche opère un routeur ?", a:"La couche 3 (réseau), en lisant l'adresse IP de destination."},
+ {q:"C'est quoi un switch de niveau 3 ?", a:"Un commutateur capable aussi de router, en manipulant des paquets IP."},
+ {q:"C'est quoi un hub ?", a:"Un répéteur de niveau 1 qui renvoie le signal sur tous ses ports."},
+ {q:"Une adresse IPv6 est codée sur combien de bits ?", a:"128 bits."},
+ {q:"Les adresses IPv6 globales sont-elles routables ?", a:"Oui, les adresses globales unicast sont publiques et routables sur Internet."},
+ {q:"Que signifie 'échanges chiffrés' (HTTPS, SSH) ?", a:"Les données sont rendues illisibles sans la clé, pas seulement encodées."},
+ {q:"Comment stocke-t-on un mot de passe en base ?", a:"On le hache (fonction à sens unique), on ne le chiffre pas."},
+ {q:"C'est quoi GigabitEthernet ?", a:"Une norme Ethernet à 1 Gb/s."},
+ {q:"C'est quoi le 10 GigabitEthernet ?", a:"Une norme Ethernet à 10 Gb/s."},
+ {q:"Quelle unité mesure la hauteur des serveurs en baie ?", a:"Le U (unité de rack), 1 U = 44,45 mm."},
+ {q:"Quel réseau a la plus grande étendue : LAN, MAN, WAN ?", a:"Le WAN (étendu), devant le MAN (métropolitain) et le LAN (local)."},
+ {q:"C'est quoi une passerelle par défaut ?", a:"Le routeur par lequel une machine sort de son réseau local."},
+ {q:"Deux machines de réseaux différents sur un câble direct communiquent-elles ?", a:"Non : il faut un routeur, ou les mettre dans le même réseau."}
 ],
 SA4:[
  {q:"C'est quoi Active Directory ?", a:"L'annuaire centralisé de Windows : comptes, machines, droits et authentification d'un domaine."},
  {q:"C'est quoi un contrôleur de domaine (DC) ?", a:"Le serveur qui héberge Active Directory et authentifie les comptes."},
+ {q:"C'est quoi une forêt AD ?", a:"L'ensemble le plus large d'un annuaire, regroupant un ou plusieurs domaines."},
+ {q:"C'est quoi un domaine AD ?", a:"Une frontière d'administration et de sécurité regroupant comptes, machines et droits."},
  {q:"C'est quoi une OU ?", a:"Une Unité d'Organisation : un conteneur qui range les objets AD pour y appliquer des GPO."},
+ {q:"Quels objets gère Active Directory ?", a:"Des utilisateurs, des ordinateurs, des groupes, des OU, des imprimantes, des partages."},
  {q:"C'est quoi une GPO ?", a:"Une stratégie de groupe qui applique des réglages aux utilisateurs et aux postes du domaine."},
+ {q:"Avec quel outil gère-t-on les GPO ?", a:"La console GPMC (Group Policy Management Console)."},
+ {q:"À quoi sert gpupdate /force ?", a:"À réappliquer immédiatement les stratégies de groupe."},
+ {q:"Quelle est la portée d'une GPO ?", a:"Un site, un domaine ou une OU (ordre LSDOU)."},
  {q:"C'est quoi le DNS dans un domaine AD ?", a:"Le service qui résout les noms et permet aux postes de trouver les contrôleurs de domaine."},
+ {q:"C'est quoi une zone DNS ?", a:"Un conteneur d'enregistrements DNS ; elle peut être principale, secondaire ou stub."},
+ {q:"C'est quoi un enregistrement A ?", a:"Un enregistrement DNS qui associe un nom à une adresse IPv4."},
+ {q:"C'est quoi le DHCP (côté serveur) ?", a:"Le rôle qui distribue automatiquement les adresses IP aux postes."},
  {q:"C'est quoi le DFS ?", a:"Un système de fichiers distribué qui regroupe des partages sous un espace de noms unique, avec réplication."},
+ {q:"Quel protocole pour le partage de fichiers Windows ?", a:"SMB (port 445)."},
  {q:"C'est quoi les permissions NTFS ?", a:"Les droits d'accès fins (lecture, modification, contrôle total) posés sur les fichiers et dossiers."},
- {q:"C'est quoi Hyper-V ?", a:"L'hyperviseur de type 1 de Microsoft, intégré à Windows Server."},
+ {q:"Entre partage et NTFS, quelle permission l'emporte ?", a:"La plus restrictive des deux."},
+ {q:"Quelle permission NTFS permet de lire sans modifier ?", a:"La permission Read (lecture)."},
  {q:"C'est quoi un profil itinérant ?", a:"Un profil utilisateur stocké sur un serveur, retrouvé sur n'importe quel poste du domaine."},
- {q:"C'est quoi RDS ?", a:"Remote Desktop Services : des bureaux et applications à distance, en RDP."}
+ {q:"C'est quoi la redirection de dossiers ?", a:"Placer Documents, Bureau... sur un partage réseau pour les retrouver partout."},
+ {q:"C'est quoi IIS ?", a:"Le serveur web de Microsoft (équivalent d'Apache ou Nginx)."},
+ {q:"C'est quoi un pool d'applications IIS ?", a:"Un conteneur de processus qui isole les applications web pour la sécurité et la stabilité."},
+ {q:"Comment sécuriser un site IIS en HTTPS ?", a:"Installer un certificat SSL, puis ajouter une liaison HTTPS au site."},
+ {q:"C'est quoi Windows Server Backup ?", a:"L'outil intégré de sauvegarde et de restauration de fichiers et de systèmes."},
+ {q:"C'est quoi WDS ?", a:"Windows Deployment Services : déployer des systèmes d'exploitation par le réseau."},
+ {q:"C'est quoi RDS ?", a:"Remote Desktop Services : des bureaux et applications à distance, en RDP."},
+ {q:"À quoi sert la passerelle RD Gateway ?", a:"À sécuriser les connexions RDP en les encapsulant dans du HTTPS."},
+ {q:"C'est quoi Hyper-V ?", a:"L'hyperviseur de type 1 de Microsoft, intégré à Windows Server."},
+ {q:"C'est quoi un compte machine ?", a:"Un compte créé dans l'annuaire quand un poste rejoint le domaine."},
+ {q:"C'est quoi Kerberos (côté AD) ?", a:"Le protocole d'authentification par défaut du domaine, à base de tickets."},
+ {q:"C'est quoi LDAP ?", a:"Le protocole d'interrogation de l'annuaire Active Directory."},
+ {q:"C'est quoi un groupe de sécurité AD ?", a:"Un regroupement de comptes pour attribuer des droits en une fois."},
+ {q:"Différence groupe / OU ?", a:"Le groupe sert à donner des droits ; l'OU sert à organiser et à appliquer des GPO."},
+ {q:"C'est quoi le rôle ADDS ?", a:"Active Directory Domain Services, le rôle qui fait d'un serveur un contrôleur de domaine."},
+ {q:"Comment promeut-on un serveur en DC ?", a:"En installant le rôle ADDS puis en le promouvant (première forêt ou domaine existant)."},
+ {q:"C'est quoi un SID ?", a:"L'identifiant de sécurité unique d'un compte ou d'un groupe Windows."},
+ {q:"C'est quoi un snapshot Hyper-V ?", a:"Un point de contrôle qui fige l'état d'une VM pour pouvoir y revenir."},
+ {q:"C'est quoi un serveur de fichiers ?", a:"Un serveur dont le rôle est de partager des dossiers sur le réseau."},
+ {q:"C'est quoi NTDS.dit ?", a:"Le fichier de base de données d'Active Directory, qui contient les comptes et leurs secrets."}
 ],
 SA5:[
  {q:"C'est quoi Linux ?", a:"Le noyau d'un système d'exploitation, créé par Linus Torvalds en 1991."},
- {q:"Différence noyau / distribution ?", a:"Le noyau est Linux seul ; la distribution ajoute les outils GNU et un gestionnaire de paquets (Debian, Ubuntu…)."},
+ {q:"Différence noyau / distribution ?", a:"Le noyau est Linux seul ; la distribution ajoute les outils GNU et un gestionnaire de paquets."},
+ {q:"C'est quoi une distribution Linux ?", a:"Un ensemble de logiciels assemblés autour du noyau Linux (Debian, Ubuntu, RHEL)."},
+ {q:"Qu'ajoute-t-on à Linux pour un OS complet ?", a:"Les outils GNU, d'où le nom GNU/Linux."},
+ {q:"Qui a créé le projet GNU ?", a:"Richard Stallman, en 1983."},
+ {q:"C'est quoi un logiciel libre ?", a:"Un logiciel qu'on peut utiliser, étudier, modifier et redistribuer librement."},
+ {q:"Libre veut-il dire gratuit ?", a:"Non : free as in free speech, not free beer (liberté, pas prix)."},
+ {q:"Quel gestionnaire de paquets chez Debian ?", a:"dpkg et apt (paquets .deb)."},
+ {q:"Quel gestionnaire de paquets chez Red Hat ?", a:"RPM et dnf (paquets .rpm)."},
+ {q:"Qu'est-ce qui distingue les familles de distributions ?", a:"Surtout le gestionnaire de paquets."},
+ {q:"C'est quoi le shell Bash ?", a:"L'interpréteur de commandes par défaut de la plupart des distributions Linux."},
+ {q:"C'est quoi un environnement de bureau ?", a:"Une interface graphique complète comme Gnome, KDE ou XFCE."},
  {q:"C'est quoi le bit SUID ?", a:"Un droit qui fait tourner un programme avec les droits de son propriétaire, pas de celui qui le lance."},
  {q:"C'est quoi sudo ?", a:"La commande qui exécute une action avec les droits root, si l'utilisateur y est autorisé."},
+ {q:"Comment éditer /etc/sudoers correctement ?", a:"Avec la commande visudo, qui vérifie la syntaxe."},
  {q:"C'est quoi les permissions en notation octale ?", a:"Trois chiffres (r=4, w=2, x=1) pour le propriétaire, le groupe et les autres (ex. 700)."},
+ {q:"Quelle permission manque pour lancer un script ?", a:"Le droit d'exécution x (chmod +x)."},
+ {q:"Quelle commande change les permissions ?", a:"chmod."},
+ {q:"Quelle commande change le propriétaire ?", a:"chown."},
  {q:"À quoi sert /etc/fstab ?", a:"À indiquer les partitions à monter automatiquement au démarrage."},
+ {q:"À quoi sert /etc/passwd ?", a:"À lister les comptes du système."},
+ {q:"Où sont les fichiers de configuration ?", a:"Dans /etc, en général."},
+ {q:"C'est quoi le dossier courant et le dossier parent ?", a:"Le point (.) désigne le dossier courant, deux points (..) le dossier parent."},
+ {q:"Que désigne le caractère tilde ?", a:"Le dossier personnel de l'utilisateur."},
+ {q:"Différence chemin absolu / relatif ?", a:"L'absolu part de la racine (/) ; le relatif part du dossier courant."},
  {q:"C'est quoi le PATH ?", a:"La liste des dossiers où le shell cherche les commandes à exécuter."},
  {q:"C'est quoi un pipe ( | ) ?", a:"Un opérateur qui envoie la sortie d'une commande vers l'entrée d'une autre."},
- {q:"Différence entre > et >> ?", a:"> écrase le fichier ; >> ajoute à la fin."},
- {q:"C'est quoi le shell Bash ?", a:"L'interpréteur de commandes par défaut de la plupart des distributions Linux."}
+ {q:"Différence entre > et >> ?", a:"Le signe > écrase le fichier ; >> ajoute à la fin."},
+ {q:"Quelle commande crée un dossier ?", a:"mkdir."},
+ {q:"Quelle commande copie un fichier ?", a:"cp."},
+ {q:"Quelle commande liste les fichiers ?", a:"ls (ls -la pour les détails et les fichiers cachés)."},
+ {q:"Quelle commande change de dossier ?", a:"cd."},
+ {q:"Quelle commande affiche un fichier entier ?", a:"cat."},
+ {q:"Quelle commande lit le manuel ?", a:"man."},
+ {q:"Quel éditeur est présent sur presque tous les Unix ?", a:"vi."},
+ {q:"Quel est le bootloader le plus courant sous Linux ?", a:"GRUB."},
+ {q:"BIOS ou UEFI sur les machines modernes ?", a:"UEFI, qui a remplacé le BIOS."},
+ {q:"Sur quelle machine Linux a-t-il été créé ?", a:"Un PC avec un processeur Intel 80386 (i386)."},
+ {q:"Quel langage a été créé pour Unix dans les années 70 ?", a:"Le langage C, par Dennis Ritchie."},
+ {q:"Quels sont les 3 principes de la philosophie Unix ?", a:"Faire une seule chose et bien, faire collaborer les programmes, manipuler des flux de texte."}
 ],
 SB1:[
  {q:"Différence hyperviseur type 1 / type 2 ?", a:"Le type 1 s'installe sur le matériel (ESXi, Proxmox) ; le type 2 sur un OS hôte (VirtualBox)."},
@@ -7015,11 +7165,7 @@ function notionCount(s){
   return n;
 }
 function flashDeck(s){
-  const d = [];
-  s.sections.forEach(sec => sec.g.forEach(g => {
-    if(g.kv) g.kv.forEach(([k,v]) => d.push({ctx: g.h || sec.t, k, v}));
-  }));
-  return d;
+  return (s.qr || []).map(p => ({k: p.q, v: p.a}));
 }
 const TOTAL_NOTIONS = SEASONS.reduce((a,s) => a + notionCount(s), 0);
 
@@ -7117,7 +7263,7 @@ function renderResults(){
 /* ---------- Saison ---------- */
 function renderSeason(){
   const s = byId[state.sid];
-  const tabs = [["cards","Mémo"],["syn","Synthèses"],["qr","Antisèche"],["quiz","QCM"],["ecf","ECF"]];
+  const tabs = [["cards","Mémo"],["syn","Synthèses"],["qr","Flash Q/R"],["quiz","QCM"],["ecf","ECF"]];
   $app.innerHTML = `<div style="--c:${s.c}">
     <header class="top"><div class="top-in">
       <div class="top-row">
@@ -7136,7 +7282,7 @@ function renderPane(){
   const pane = document.getElementById("pane");
   if(state.tab === "cards") pane.innerHTML = cardsHTML(s);
   else if(state.tab === "syn") pane.innerHTML = synHTML(s);
-  else if(state.tab === "qr") pane.innerHTML = qrHTML(s);
+  else if(state.tab === "qr") pane.innerHTML = flashHTML(s);
   else if(state.tab === "ecf") pane.innerHTML = ecfHTML(s);
   else pane.innerHTML = quizHTML(s);
 }
@@ -7222,15 +7368,15 @@ function newFlash(s, only){
   state.flash = {deck, i:0, flipped:false, ok:[], ko:[]};
 }
 function flashHTML(s){
-  if(!flashDeck(s).length) return comingSoon(s, "Flashcards", `./flash --saison ${s.id.toLowerCase()}`);
+  if(!flashDeck(s).length) return comingSoon(s, "Flash Q/R", `./flash --saison ${s.id.toLowerCase()}`);
   if(!state.flash) newFlash(s);
   const f = state.flash;
   if(f.i >= f.deck.length){
     const total = f.deck.length;
     return `<div class="panel">
       <p class="mono" style="color:var(--c);font-size:12px">// session terminée</p>
-      <h3>${f.ok.length} / ${total} notions maîtrisées</h3>
-      <p>${f.ko.length ? `${f.ko.length} notion${f.ko.length>1?"s":""} à revoir. Relance uniquement celles-là pour les fixer.` : "Aucune notion ratée, bravo."}</p>
+      <h3>${f.ok.length} / ${total} réponses sues</h3>
+      <p>${f.ko.length ? `${f.ko.length} question${f.ko.length>1?"s":""} à revoir. Relance uniquement celles-là pour les fixer.` : "Aucune question ratée, bravo."}</p>
       <div class="btn-row">
         ${f.ko.length ? `<button class="btn pri" data-act="flash-ko">Revoir les ${f.ko.length} ratées</button>` : ""}
         <button class="btn" data-act="flash-new">Nouveau paquet complet</button>
@@ -7243,8 +7389,8 @@ function flashHTML(s){
   <div class="bar"><i style="width:${pct}%"></i></div>
   <button class="flip${f.flipped ? " on" : ""}" data-act="flip" aria-label="Retourner la carte">
     <div class="flip-in">
-      <div class="face front"><small>${esc(c.ctx)}</small><div class="big">${esc(c.k)}</div><span class="hint">touche pour révéler ↻</span></div>
-      <div class="face backf"><small>${esc(c.ctx)} › ${esc(c.k)}</small><div class="ans">${esc(c.v)}</div><span class="hint">tu le savais ?</span></div>
+      <div class="face front"><small>Question</small><div class="big">${esc(c.k)}</div><span class="hint">touche pour révéler ↻</span></div>
+      <div class="face backf"><small>Réponse</small><div class="ans">${esc(c.v)}</div><span class="hint">tu le savais ?</span></div>
     </div>
   </button>
   <div class="fl-actions">
