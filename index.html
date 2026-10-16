@@ -142,6 +142,11 @@ mark{background:rgba(255,194,62,.25);color:inherit;border-radius:2px}
 .ecf-q .multi{font-family:var(--f-mono);font-size:11px;color:var(--warn)}
 .ecf-q.todo{border-color:color-mix(in srgb,var(--warn) 45%,var(--line))}
 .ecf-list{display:grid;gap:12px;margin-top:14px}
+.qa-list{display:grid;gap:10px;margin-top:14px}
+.qa{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.qa-q{margin:0 0 6px;font-weight:600;font-size:15px;line-height:1.4;display:flex;gap:8px;align-items:baseline}
+.qa-n{font-family:var(--f-mono);font-size:11px;color:var(--c);flex:none}
+.qa-a{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
 .ecf-sec{margin:10px 0 -2px;font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
 .ecf-sec::before{content:"## ";opacity:.6}
 .ecf-in{width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg,#080c18);color:var(--fg);font-family:var(--f-mono);font-size:16px;outline:none}
@@ -6787,6 +6792,179 @@ SC5: {title:"ECF SC5 : Pentesting", intro:"40 questions, une seule réponse par 
 ]}
 };
 SEASONS.forEach(s => { s.ecf = ECF[s.id] || null; });
+
+/* ---------- Antisèche : questions / réponses express par saison ---------- */
+const QR = {
+SA1:[
+ {q:"C'est quoi l'encodage ?", a:"Le procédé qui fait correspondre chaque caractère à un nombre binaire (ASCII, UTF-8), sans aucun secret."},
+ {q:"C'est quoi le binaire ?", a:"Le système de numération en base 2, avec seulement deux chiffres : 0 et 1."},
+ {q:"À quoi sert le CPU ?", a:"Le processeur exécute les instructions, c'est-à-dire les calculs de la machine."},
+ {q:"C'est quoi le système hexadécimal ?", a:"La base 16 (0-9 puis A-F) ; un chiffre hexadécimal vaut 4 bits."},
+ {q:"Différence chiffrement symétrique / asymétrique ?", a:"Le symétrique utilise une seule clé partagée, l'asymétrique une paire clé publique / clé privée."},
+ {q:"C'est quoi le chiffrement hybride ?", a:"L'asymétrique sert à échanger une clé, puis le symétrique (rapide) chiffre les données : c'est le principe de HTTPS."},
+ {q:"C'est quoi les critères DICP ?", a:"Disponibilité, Intégrité, Confidentialité, Preuve : les piliers de la sécurité de l'information."},
+ {q:"C'est quoi la virtualisation ?", a:"Une technique qui crée plusieurs machines virtuelles isolées sur un même matériel, via un hyperviseur."},
+ {q:"C'est quoi une IHM ?", a:"Une Interface Homme-Machine : le moyen de dialoguer avec la machine (ligne de commande, interface graphique)."},
+ {q:"C'est quoi un firmware ?", a:"Un logiciel embarqué dans un composant électronique (BIOS/UEFI, firmware d'un routeur)."}
+],
+SA2:[
+ {q:"C'est quoi le BIOS/UEFI ?", a:"Le firmware de la carte mère qui teste le matériel puis lance le système d'exploitation."},
+ {q:"Différence MBR / GPT ?", a:"Le MBR est limité à 4 partitions et 2 To ; le GPT lève ces limites et accompagne l'UEFI."},
+ {q:"C'est quoi Secure Boot ?", a:"Une fonction UEFI qui n'autorise que le démarrage de chargeurs signés, contre les rootkits."},
+ {q:"C'est quoi un incident en ITIL ?", a:"Une interruption non planifiée ou une dégradation d'un service."},
+ {q:"C'est quoi GLPI ?", a:"Un logiciel libre de gestion de parc et de tickets (ITSM)."},
+ {q:"Que mesure le TTR ?", a:"Le temps écoulé entre la création d'un ticket et sa résolution."},
+ {q:"C'est quoi la réglementation DEEE ?", a:"L'obligation de trier et de confier les déchets électroniques à une filière agréée."},
+ {q:"C'est quoi WinPE ?", a:"Un mini-Windows de démarrage, utilisé pour déployer ou dépanner un système."},
+ {q:"Différence Office 2024 / Microsoft 365 ?", a:"Office 2024 est une licence perpétuelle ; Microsoft 365 est un abonnement toujours à jour avec OneDrive."},
+ {q:"C'est quoi le Wake-on-LAN ?", a:"Une technologie qui réveille un ordinateur à distance via le réseau."}
+],
+SA3:[
+ {q:"C'est quoi une adresse IP ?", a:"L'identifiant logique d'une machine sur un réseau (32 bits en IPv4, 128 bits en IPv6)."},
+ {q:"C'est quoi un masque de sous-réseau ?", a:"Une suite de bits qui sépare la partie réseau de la partie hôte d'une adresse IP."},
+ {q:"C'est quoi la notation CIDR ?", a:"Le nombre de bits à 1 du masque, noté après l'adresse (ex. /24 = 255.255.255.0)."},
+ {q:"C'est quoi une adresse MAC ?", a:"L'identifiant physique d'une carte réseau, codé sur 48 bits."},
+ {q:"C'est quoi le modèle OSI ?", a:"Un modèle en 7 couches qui décrit les étapes d'une communication réseau."},
+ {q:"Différence TCP / UDP ?", a:"TCP est fiable (accusés de réception, retransmission) ; UDP est rapide mais sans garantie."},
+ {q:"C'est quoi un VLAN ?", a:"Un réseau logique qui cloisonne un switch physique en plusieurs réseaux séparés."},
+ {q:"C'est quoi le NAT ?", a:"La traduction d'adresses qui permet à un réseau privé de sortir sur Internet derrière une IP publique."},
+ {q:"C'est quoi le DHCP ?", a:"Un protocole qui distribue automatiquement les adresses IP sur un réseau."},
+ {q:"Différence routeur / switch ?", a:"Le routeur relie des réseaux différents (couche 3, IP) ; le switch relie des machines d'un même réseau (couche 2, MAC)."}
+],
+SA4:[
+ {q:"C'est quoi Active Directory ?", a:"L'annuaire centralisé de Windows : comptes, machines, droits et authentification d'un domaine."},
+ {q:"C'est quoi un contrôleur de domaine (DC) ?", a:"Le serveur qui héberge Active Directory et authentifie les comptes."},
+ {q:"C'est quoi une OU ?", a:"Une Unité d'Organisation : un conteneur qui range les objets AD pour y appliquer des GPO."},
+ {q:"C'est quoi une GPO ?", a:"Une stratégie de groupe qui applique des réglages aux utilisateurs et aux postes du domaine."},
+ {q:"C'est quoi le DNS dans un domaine AD ?", a:"Le service qui résout les noms et permet aux postes de trouver les contrôleurs de domaine."},
+ {q:"C'est quoi le DFS ?", a:"Un système de fichiers distribué qui regroupe des partages sous un espace de noms unique, avec réplication."},
+ {q:"C'est quoi les permissions NTFS ?", a:"Les droits d'accès fins (lecture, modification, contrôle total) posés sur les fichiers et dossiers."},
+ {q:"C'est quoi Hyper-V ?", a:"L'hyperviseur de type 1 de Microsoft, intégré à Windows Server."},
+ {q:"C'est quoi un profil itinérant ?", a:"Un profil utilisateur stocké sur un serveur, retrouvé sur n'importe quel poste du domaine."},
+ {q:"C'est quoi RDS ?", a:"Remote Desktop Services : des bureaux et applications à distance, en RDP."}
+],
+SA5:[
+ {q:"C'est quoi Linux ?", a:"Le noyau d'un système d'exploitation, créé par Linus Torvalds en 1991."},
+ {q:"Différence noyau / distribution ?", a:"Le noyau est Linux seul ; la distribution ajoute les outils GNU et un gestionnaire de paquets (Debian, Ubuntu…)."},
+ {q:"C'est quoi le bit SUID ?", a:"Un droit qui fait tourner un programme avec les droits de son propriétaire, pas de celui qui le lance."},
+ {q:"C'est quoi sudo ?", a:"La commande qui exécute une action avec les droits root, si l'utilisateur y est autorisé."},
+ {q:"C'est quoi les permissions en notation octale ?", a:"Trois chiffres (r=4, w=2, x=1) pour le propriétaire, le groupe et les autres (ex. 700)."},
+ {q:"À quoi sert /etc/fstab ?", a:"À indiquer les partitions à monter automatiquement au démarrage."},
+ {q:"C'est quoi le PATH ?", a:"La liste des dossiers où le shell cherche les commandes à exécuter."},
+ {q:"C'est quoi un pipe ( | ) ?", a:"Un opérateur qui envoie la sortie d'une commande vers l'entrée d'une autre."},
+ {q:"Différence entre > et >> ?", a:"> écrase le fichier ; >> ajoute à la fin."},
+ {q:"C'est quoi le shell Bash ?", a:"L'interpréteur de commandes par défaut de la plupart des distributions Linux."}
+],
+SB1:[
+ {q:"Différence hyperviseur type 1 / type 2 ?", a:"Le type 1 s'installe sur le matériel (ESXi, Proxmox) ; le type 2 sur un OS hôte (VirtualBox)."},
+ {q:"C'est quoi Proxmox VE ?", a:"Une plateforme open source qui gère à la fois des machines virtuelles (KVM) et des conteneurs (LXC)."},
+ {q:"Différence VM / conteneur ?", a:"Une VM embarque son propre OS complet ; un conteneur partage le noyau de l'hôte."},
+ {q:"C'est quoi ESXi ?", a:"L'hyperviseur de type 1 de VMware, installé directement sur le serveur."},
+ {q:"C'est quoi vCenter ?", a:"L'outil de gestion centralisée de plusieurs hôtes ESXi."},
+ {q:"C'est quoi vMotion ?", a:"La migration d'une VM allumée d'un hôte à un autre, sans coupure de service."},
+ {q:"C'est quoi la haute disponibilité (HA) ?", a:"Le redémarrage automatique des VM sur un autre hôte en cas de panne."},
+ {q:"C'est quoi un snapshot ?", a:"Une photo de l'état d'une VM à un instant donné, pour pouvoir y revenir."},
+ {q:"C'est quoi KVM ?", a:"Un module du noyau Linux qui transforme Linux en hyperviseur de type 1."},
+ {q:"C'est quoi LXC ?", a:"Des conteneurs système Linux, plus légers qu'une VM car ils partagent le noyau."}
+],
+SB2:[
+ {q:"Que signifie RPO ?", a:"Recovery Point Objective : la quantité maximale de données qu'on accepte de perdre."},
+ {q:"Que signifie RTO ?", a:"Recovery Time Objective : la durée maximale d'interruption acceptée avant le retour du service."},
+ {q:"Différence PRA / PCA ?", a:"Le PRA restaure l'activité après un sinistre ; le PCA la maintient pendant l'incident."},
+ {q:"Différence sauvegarde incrémentielle / différentielle ?", a:"L'incrémentielle sauvegarde depuis la dernière sauvegarde ; la différentielle depuis la dernière complète."},
+ {q:"Différence snapshot / sauvegarde ?", a:"Le snapshot dépend du stockage d'origine ; la sauvegarde est une copie indépendante sur un autre support."},
+ {q:"C'est quoi la règle 3-2-1 ?", a:"3 copies des données, sur 2 supports différents, dont 1 hors site."},
+ {q:"C'est quoi le RAID 0 ?", a:"Une répartition des données sur plusieurs disques pour la vitesse, sans aucune tolérance de panne."},
+ {q:"C'est quoi le RAID 1 ?", a:"Un miroir qui copie les mêmes données sur deux disques (redondance)."},
+ {q:"C'est quoi le RAID 5 ?", a:"Une répartition avec parité sur au moins 3 disques, qui tolère la panne d'un disque."},
+ {q:"Différence stockage online / nearline ?", a:"L'online est accessible immédiatement ; le nearline rapidement, mais pas en continu."}
+],
+SB3:[
+ {q:"Différence supervision / monitoring ?", a:"Le monitoring collecte les données ; la supervision les interprète et déclenche des actions."},
+ {q:"C'est quoi la supervision proactive ?", a:"Surveiller les tendances et les seuils pour agir avant la panne."},
+ {q:"C'est quoi SNMP ?", a:"Un protocole qui interroge les équipements réseau pour la supervision."},
+ {q:"C'est quoi Syslog ?", a:"Un protocole qui centralise les journaux des équipements."},
+ {q:"Différence polling / push ?", a:"En polling le serveur interroge les équipements ; en push les équipements envoient d'eux-mêmes leurs données."},
+ {q:"C'est quoi une TSDB ?", a:"Une base de données de séries temporelles, optimisée pour les métriques (Prometheus, InfluxDB)."},
+ {q:"C'est quoi la corrélation d'événements ?", a:"Relier plusieurs alertes entre elles pour retrouver la cause unique d'un incident."},
+ {q:"À quoi sert la gestion des seuils ?", a:"Éviter les fausses alertes tout en réagissant vite aux vrais incidents."},
+ {q:"C'est quoi un KPI ?", a:"Un indicateur chiffré qui mesure la performance et l'avancement."},
+ {q:"C'est quoi un SIEM ?", a:"Un outil qui centralise et corrèle les journaux de sécurité pour détecter les menaces."}
+],
+SB4:[
+ {q:"Quelle extension pour un script Bash ?", a:".sh"},
+ {q:"Quelle extension pour un script PowerShell ?", a:".ps1"},
+ {q:"C'est quoi cron ?", a:"Le planificateur de tâches de Linux, qui lance des commandes à heure fixe."},
+ {q:"C'est quoi une variable ?", a:"Un nom associé à une valeur gardée en mémoire pendant l'exécution du script."},
+ {q:"À quoi sert une boucle while ?", a:"Répéter des actions tant qu'une condition est vraie."},
+ {q:"À quoi sert if / else ?", a:"Changer le comportement du script selon une condition."},
+ {q:"C'est quoi un script idempotent ?", a:"Un script qu'on peut relancer plusieurs fois sans changer le résultat final."},
+ {q:"C'est quoi une variable d'environnement ?", a:"Une valeur de configuration (souvent sensible) stockée hors du code du script."},
+ {q:"Comment commente-t-on en Bash ?", a:"Avec le caractère # en début de ligne."},
+ {q:"C'est quoi un shebang ?", a:"La première ligne #!/bin/bash qui indique l'interpréteur à utiliser."}
+],
+SC1:[
+ {q:"C'est quoi un projet ?", a:"Un ensemble d'activités coordonnées vers un objectif unique, dans un temps défini et avec des ressources limitées."},
+ {q:"C'est quoi le triangle QCD ?", a:"Qualité, Coût, Délai : trois contraintes liées d'un projet."},
+ {q:"C'est quoi le cycle en V ?", a:"Une méthode où chaque phase de conception a sa phase de test, adaptée à un besoin stable."},
+ {q:"Différence MOA / MOE ?", a:"La MOA (maîtrise d'ouvrage) exprime le besoin ; la MOE (maîtrise d'œuvre) réalise."},
+ {q:"C'est quoi Agile ?", a:"Une approche itérative qui s'adapte au changement, avec un client impliqué."},
+ {q:"C'est quoi un sprint (Scrum) ?", a:"Une itération de durée fixe (1 mois maximum) qui produit un incrément du produit."},
+ {q:"C'est quoi la matrice RACI ?", a:"Un tableau des rôles : Responsible, Accountable, Consulted, Informed."},
+ {q:"C'est quoi un jalon (Gantt) ?", a:"Un événement clé sans durée, qui marque un point de passage du projet."},
+ {q:"C'est quoi un risque ?", a:"Un événement incertain qui, s'il survient, a un impact négatif sur le projet."},
+ {q:"Comment calcule-t-on la criticité d'un risque ?", a:"Probabilité × Impact."}
+],
+SC2:[
+ {q:"C'est quoi le cloud selon le NIST ?", a:"Un service à la demande, en libre-service, mutualisé, élastique et facturé à l'usage."},
+ {q:"Différence IaaS / PaaS / SaaS ?", a:"L'IaaS fournit l'infrastructure, le PaaS la plateforme de développement, le SaaS l'application complète."},
+ {q:"C'est quoi la responsabilité partagée ?", a:"Le fournisseur sécurise le cloud ; le client sécurise ce qu'il met dedans."},
+ {q:"C'est quoi un SLA ?", a:"Un accord contractuel sur le niveau de service (ex. 99,9 % de disponibilité)."},
+ {q:"Différence SLI / SLO / SLA ?", a:"Le SLI est la mesure, le SLO l'objectif interne, le SLA l'engagement contractuel."},
+ {q:"C'est quoi le RGPD ?", a:"Le règlement européen sur la protection des données personnelles, applicable depuis 2018."},
+ {q:"C'est quoi le Cloud Act ?", a:"Une loi américaine qui permet d'exiger des données d'un fournisseur US, même stockées en Europe."},
+ {q:"C'est quoi OpenStack ?", a:"Un ensemble de services open source pour bâtir son propre cloud privé (IaaS)."},
+ {q:"C'est quoi l'élasticité ?", a:"La capacité du cloud à augmenter ou réduire automatiquement les ressources selon la charge."},
+ {q:"C'est quoi le cloud hybride ?", a:"Un mélange de cloud public et de cloud privé reliés entre eux."}
+],
+SC3:[
+ {q:"C'est quoi la triade CIA (DIC) ?", a:"Disponibilité, Intégrité, Confidentialité : les piliers de la sécurité de l'information."},
+ {q:"Différence ISO 27001 / 27002 ?", a:"La 27001 définit les exigences certifiables d'un SMSI ; la 27002 est le catalogue de bonnes pratiques."},
+ {q:"C'est quoi un SOC ?", a:"Un centre opérationnel de sécurité qui surveille et répond aux incidents."},
+ {q:"C'est quoi un SIEM ?", a:"Un outil qui centralise et corrèle les journaux pour détecter les menaces."},
+ {q:"Différence EDR / antivirus ?", a:"L'antivirus compare des signatures connues ; l'EDR analyse les comportements sur les postes."},
+ {q:"C'est quoi une DMZ ?", a:"Un réseau tampon qui héberge les services exposés, sans route directe vers le réseau interne."},
+ {q:"C'est quoi netfilter ?", a:"Le framework de filtrage de paquets intégré au noyau Linux, piloté par iptables ou nftables."},
+ {q:"C'est quoi fail2ban ?", a:"Un outil qui bannit les adresses IP après trop d'échecs d'authentification."},
+ {q:"Différence IDS / IPS ?", a:"L'IDS détecte et alerte ; l'IPS détecte et peut bloquer le trafic."},
+ {q:"C'est quoi un WAF ?", a:"Un pare-feu applicatif qui filtre le trafic HTTP malveillant (injections SQL, XSS)."}
+],
+SC4:[
+ {q:"Différence conteneur / machine virtuelle ?", a:"Le conteneur partage le noyau de l'hôte ; la VM embarque son propre OS."},
+ {q:"C'est quoi Docker ?", a:"Un outil qui exécute des applications dans des conteneurs isolés et reproductibles."},
+ {q:"C'est quoi une image Docker ?", a:"Un modèle immuable contenant tout le nécessaire pour exécuter une application."},
+ {q:"C'est quoi un Dockerfile ?", a:"Le fichier recette qui décrit comment construire une image."},
+ {q:"C'est quoi un volume Docker ?", a:"Un stockage géré par Docker qui garde les données au-delà de la vie d'un conteneur."},
+ {q:"C'est quoi Docker Compose ?", a:"Un outil qui définit et lance une application multi-conteneurs via un fichier YAML."},
+ {q:"C'est quoi Docker Swarm ?", a:"L'orchestrateur natif de Docker pour gérer un cluster de nœuds."},
+ {q:"C'est quoi Kubernetes ?", a:"L'orchestrateur de conteneurs de référence, créé par Google."},
+ {q:"C'est quoi un réplica (Swarm) ?", a:"Une instance supplémentaire d'un service, répartie sur le cluster."},
+ {q:"Différence LXC / Docker ?", a:"LXC simule un OS Linux complet ; Docker isole en principe un seul processus applicatif."}
+],
+SC5:[
+ {q:"C'est quoi un test d'intrusion ?", a:"Une simulation d'attaques réelles, dans un périmètre défini avec le client, pour trouver les failles avant un attaquant."},
+ {q:"C'est quoi les ROE ?", a:"Les Rules of Engagement : le document qui fixe l'autorisation, le périmètre, les règles et les contacts d'une mission."},
+ {q:"Différence black / grey / white box ?", a:"Black box : aucune information ; grey box : un compte standard ; white box : accès au code et à la documentation."},
+ {q:"C'est quoi le PTES ?", a:"Un standard de test d'intrusion en 7 phases, du pré-engagement au rapport."},
+ {q:"C'est quoi Kerberos ?", a:"Un protocole d'authentification Windows qui délivre des tickets via un tiers de confiance, le KDC."},
+ {q:"C'est quoi le Pass the Hash ?", a:"S'authentifier avec le hash NTLM d'un compte sans connaître son mot de passe en clair."},
+ {q:"C'est quoi le Kerberoasting ?", a:"Récupérer le ticket d'un compte de service pour casser hors ligne son mot de passe faible ; parade : les comptes gMSA."},
+ {q:"C'est quoi le Golden Ticket ?", a:"Un ticket Kerberos forgé avec la clé du compte krbtgt, utilisé pour la persistance ; parade : réinitialiser krbtgt deux fois."},
+ {q:"C'est quoi BloodHound ?", a:"Un outil qui cartographie le domaine sous forme de graphe pour révéler les chemins d'attaque."},
+ {q:"L'élévation de privilèges Linux, ça vient d'où ?", a:"Presque toujours d'une mauvaise configuration de permissions (SUID, sudo, cron), pas d'une CVE ; réflexes d'audit : find / -perm -u=s et sudo -l."}
+]
+};
+SEASONS.forEach(s => { s.qr = QR[s.id] || []; });
 /* Barème : q.p points par question (1 par défaut, 0 = non notée) ; q.s = titre de section du formulaire. */
 const qPts = q => q.p ?? 1;
 const ecfMax = x => x.qs.reduce((t, q) => t + qPts(q), 0);
@@ -6939,7 +7117,7 @@ function renderResults(){
 /* ---------- Saison ---------- */
 function renderSeason(){
   const s = byId[state.sid];
-  const tabs = [["cards","Mémo"],["syn","Synthèses"],["flash","Flash"],["quiz","QCM"],["ecf","ECF"]];
+  const tabs = [["cards","Mémo"],["syn","Synthèses"],["qr","Antisèche"],["quiz","QCM"],["ecf","ECF"]];
   $app.innerHTML = `<div style="--c:${s.c}">
     <header class="top"><div class="top-in">
       <div class="top-row">
@@ -6958,7 +7136,7 @@ function renderPane(){
   const pane = document.getElementById("pane");
   if(state.tab === "cards") pane.innerHTML = cardsHTML(s);
   else if(state.tab === "syn") pane.innerHTML = synHTML(s);
-  else if(state.tab === "flash") pane.innerHTML = flashHTML(s);
+  else if(state.tab === "qr") pane.innerHTML = qrHTML(s);
   else if(state.tab === "ecf") pane.innerHTML = ecfHTML(s);
   else pane.innerHTML = quizHTML(s);
 }
@@ -7015,6 +7193,14 @@ function synHTML(s){
 }
 /* Saison encore sans contenu : panneau d'attente au lieu d'un onglet vide. */
 function isEmpty(s){ return !s.sections.length && !s.syn.length && !s.quiz.length; }
+function qrHTML(s){
+  if(!s.qr || !s.qr.length) return comingSoon(s, "Antisèche", `./antiseche --saison ${s.id.toLowerCase()}`);
+  return `<div class="panel">
+    <p class="mono" style="color:var(--c);font-size:12px">$ ./antiseche --saison ${s.id.toLowerCase()}</p>
+    <h3>Questions / réponses express</h3>
+    <p>Les notions clés de la saison, chacune en une phrase — pour réviser à l'oral comme à l'écrit.</p></div>
+  <div class="qa-list">${s.qr.map((p, i) => `<div class="qa"><p class="qa-q"><span class="qa-n">${String(i+1).padStart(2,"0")}</span>${esc(p.q)}</p><p class="qa-a">${fmt(p.a)}</p></div>`).join("")}</div>`;
+}
 function comingSoon(s, what, cmd){
   return `<div class="panel syn-empty"><p class="mono" style="color:var(--c);font-size:12px">$ ${cmd}<br>// dossier vide</p>
     <h3>${what} à venir</h3><p>Cette saison n'a pas encore de contenu. Elle se remplira au fil des épisodes : mémo, synthèses, flashcards et QCM.</p></div>`;
